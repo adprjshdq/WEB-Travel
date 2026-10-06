@@ -2,8 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { Field, PageHead, rupiah } from '../components/ui'
-
-const API_URL = 'http://localhost:5001/api'
+import API_URL from '../services/api'
 
 export default function Account() {
   const { user, setUser, orders = [] } = useApp()
@@ -23,7 +22,8 @@ export default function Account() {
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        const token = localStorage.getItem('token')
+        const token =
+          localStorage.getItem('token')
 
         if (!token) {
           setLoadingBookings(false)
@@ -34,16 +34,19 @@ export default function Account() {
           `${API_URL}/bookings/my`,
           {
             headers: {
-              Authorization: `Bearer ${token}`
+              Authorization:
+                `Bearer ${token}`
             }
           }
         )
 
-        const result = await response.json()
+        const result =
+          await response.json()
 
         if (!response.ok) {
           console.error(
-            result.message || 'Gagal mengambil booking'
+            result.message ||
+            'Gagal mengambil booking'
           )
           return
         }
@@ -62,20 +65,26 @@ export default function Account() {
     fetchBookings()
   }, [])
 
-  const handleChange = (key) => (e) => {
-    setF((prev) => ({
-      ...prev,
-      [key]: e.target.value
-    }))
+  const handleChange =
+    (key) => (e) => {
+      setF((prev) => ({
+        ...prev,
+        [key]: e.target.value
+      }))
 
-    setOk(false)
-  }
+      setOk(false)
+    }
 
   const handleSave = (e) => {
     e.preventDefault()
 
-    if (!f.name.trim() || !f.email.trim()) {
-      alert('Nama dan email wajib diisi.')
+    if (
+      !f.name.trim() ||
+      !f.email.trim()
+    ) {
+      alert(
+        'Nama dan email wajib diisi.'
+      )
       return
     }
 
@@ -106,6 +115,7 @@ export default function Account() {
     localStorage.removeItem('jn_user')
 
     setUser(null)
+
     navigate('/login')
   }
 
@@ -113,7 +123,8 @@ export default function Account() {
     if (status === 'confirmed') {
       return {
         label: 'Confirmed',
-        message: 'Pembayaran telah dikonfirmasi.',
+        message:
+          'Pembayaran telah dikonfirmasi.',
         icon: 'fa-circle-check',
         text: 'text-green-400',
         bg: 'bg-green-500/10'
@@ -123,7 +134,8 @@ export default function Account() {
     if (status === 'cancelled') {
       return {
         label: 'Cancelled',
-        message: 'Booking ini telah dibatalkan.',
+        message:
+          'Booking ini telah dibatalkan.',
         icon: 'fa-circle-xmark',
         text: 'text-red-400',
         bg: 'bg-red-500/10'
@@ -132,7 +144,8 @@ export default function Account() {
 
     return {
       label: 'Pending',
-      message: 'Menunggu pembayaran atau konfirmasi.',
+      message:
+        'Menunggu pembayaran atau konfirmasi.',
       icon: 'fa-clock',
       text: 'text-yellow-400',
       bg: 'bg-yellow-500/10'
@@ -158,13 +171,20 @@ export default function Account() {
     }
   }
 
-  const formatPrice = (price, currency = 'IDR') => {
-    const amount = Number(price) || 0
+  const formatPrice = (
+    price,
+    currency = 'IDR'
+  ) => {
+    const amount =
+      Number(price) || 0
 
     if (
-      String(currency).toUpperCase() === 'USD'
+      String(currency).toUpperCase() ===
+      'USD'
     ) {
-      return `USD ${amount.toLocaleString('en-US')}`
+      return `USD ${amount.toLocaleString(
+        'en-US'
+      )}`
     }
 
     return rupiah(amount)
@@ -175,9 +195,14 @@ export default function Account() {
       return '-'
     }
 
-    const parsedDate = new Date(`${date}T00:00:00`)
+    const parsedDate =
+      new Date(`${date}T00:00:00`)
 
-    if (Number.isNaN(parsedDate.getTime())) {
+    if (
+      Number.isNaN(
+        parsedDate.getTime()
+      )
+    ) {
       return date
     }
 
@@ -270,7 +295,8 @@ export default function Account() {
             className="min-h-5 text-sm text-accent"
             role="status"
           >
-            {ok && 'Profil tersimpan.'}
+            {ok &&
+              'Profil tersimpan.'}
           </div>
 
           <hr className="border-line" />
@@ -315,18 +341,20 @@ export default function Account() {
           {/* LOADING */}
           {loadingBookings && (
             <div className="space-y-4">
-              {[1, 2].map((item) => (
-                <div
-                  key={item}
-                  className="card animate-pulse p-4"
-                >
-                  <div className="h-4 w-28 rounded bg-panel-soft" />
+              {[1, 2].map(
+                (item) => (
+                  <div
+                    key={item}
+                    className="card animate-pulse p-4"
+                  >
+                    <div className="h-4 w-28 rounded bg-panel-soft" />
 
-                  <div className="mt-3 h-5 w-2/3 rounded bg-panel-soft" />
+                    <div className="mt-3 h-5 w-2/3 rounded bg-panel-soft" />
 
-                  <div className="mt-4 h-16 rounded bg-panel-soft" />
-                </div>
-              ))}
+                    <div className="mt-4 h-16 rounded bg-panel-soft" />
+                  </div>
+                )
+              )}
             </div>
           )}
 
@@ -365,148 +393,149 @@ export default function Account() {
           {!loadingBookings &&
             bookings.length > 0 && (
               <div className="space-y-4">
-                {bookings.map((booking) => {
-                  const status = getStatus(
-                    booking.status
-                  )
+                {bookings.map(
+                  (booking) => {
+                    const status =
+                      getStatus(
+                        booking.status
+                      )
 
-                  return (
-                    <div
-                      key={booking.id}
-                      className="card overflow-hidden"
-                    >
-
-                      {/* STATUS */}
+                    return (
                       <div
-                        className={`p-4 ${status.bg}`}
+                        key={booking.id}
+                        className="card overflow-hidden"
                       >
-                        <div className="flex items-center gap-3">
 
-                          <i
-                            className={`fa-solid ${status.icon} text-xl ${status.text}`}
-                            aria-hidden="true"
-                          />
-
-                          <div className="min-w-0 flex-1">
-                            <p
-                              className={`font-semibold ${status.text}`}
-                            >
-                              {status.label}
-                            </p>
-
-                            <p className="text-sm text-mute">
-                              {status.message}
-                            </p>
-                          </div>
-
-                          <span className="text-sm text-mute">
-                            #{booking.id}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* CONTENT */}
-                      <div className="p-4">
-
-                        <div className="flex flex-wrap items-start justify-between gap-4">
-
-                          <div className="min-w-0 flex-1">
-                            <h3 className="text-lg font-semibold">
-                              {booking.item_name}
-                            </h3>
-
-                            <p className="mt-1 text-sm text-mute">
-                              {getTypeName(
-                                booking.item_type
-                              )}
-                            </p>
-                          </div>
-
-                          <div className="text-left sm:text-right">
-                            <p className="text-xs text-mute">
-                              Total
-                            </p>
-
-                            <p className="font-bold text-accent">
-                              {formatPrice(
-                                booking.total_price,
-                                booking.currency
-                              )}
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* INFO */}
-                        <div className="mt-4 grid gap-3 sm:grid-cols-3">
-
-                          <div className="rounded-md bg-panel-soft p-3">
-                            <p className="text-xs text-mute">
-                              Tanggal
-                            </p>
-
-                            <p className="mt-1 text-sm font-semibold">
-                              {formatDate(
-                                booking.booking_date
-                              )}
-                            </p>
-                          </div>
-
-                          <div className="rounded-md bg-panel-soft p-3">
-                            <p className="text-xs text-mute">
-                              Jumlah
-                            </p>
-
-                            <p className="mt-1 text-sm font-semibold">
-                              {booking.guests || 1} orang
-                            </p>
-                          </div>
-
-                          <div className="rounded-md bg-panel-soft p-3">
-                            <p className="text-xs text-mute">
-                              Status
-                            </p>
-
-                            <p
-                              className={`mt-1 text-sm font-semibold ${status.text}`}
-                            >
-                              {status.label}
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* ACTION */}
-                        <div className="mt-4 flex flex-wrap justify-end gap-2 border-t border-line pt-4">
-
-                          <Link
-                            to={`/booking/${booking.id}`}
-                            className="btn"
-                          >
+                        {/* STATUS */}
+                        <div
+                          className={`p-4 ${status.bg}`}
+                        >
+                          <div className="flex items-center gap-3">
                             <i
-                              className="fa-solid fa-eye"
+                              className={`fa-solid ${status.icon} text-xl ${status.text}`}
                               aria-hidden="true"
                             />
 
-                            Lihat Detail
-                          </Link>
+                            <div className="min-w-0 flex-1">
+                              <p
+                                className={`font-semibold ${status.text}`}
+                              >
+                                {status.label}
+                              </p>
 
-                          {booking.status === 'pending' && (
+                              <p className="text-sm text-mute">
+                                {status.message}
+                              </p>
+                            </div>
+
+                            <span className="text-sm text-mute">
+                              #{booking.id}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* CONTENT */}
+                        <div className="p-4">
+                          <div className="flex flex-wrap items-start justify-between gap-4">
+                            <div className="min-w-0 flex-1">
+                              <h3 className="text-lg font-semibold">
+                                {booking.item_name}
+                              </h3>
+
+                              <p className="mt-1 text-sm text-mute">
+                                {getTypeName(
+                                  booking.item_type
+                                )}
+                              </p>
+                            </div>
+
+                            <div className="text-left sm:text-right">
+                              <p className="text-xs text-mute">
+                                Total
+                              </p>
+
+                              <p className="font-bold text-accent">
+                                {formatPrice(
+                                  booking.total_price,
+                                  booking.currency
+                                )}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* INFO */}
+                          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                            <div className="rounded-md bg-panel-soft p-3">
+                              <p className="text-xs text-mute">
+                                Tanggal
+                              </p>
+
+                              <p className="mt-1 text-sm font-semibold">
+                                {formatDate(
+                                  booking.booking_date
+                                )}
+                              </p>
+                            </div>
+
+                            <div className="rounded-md bg-panel-soft p-3">
+                              <p className="text-xs text-mute">
+                                Jumlah
+                              </p>
+
+                              <p className="mt-1 text-sm font-semibold">
+                                {booking.guests ||
+                                  1}{' '}
+                                orang
+                              </p>
+                            </div>
+
+                            <div className="rounded-md bg-panel-soft p-3">
+                              <p className="text-xs text-mute">
+                                Status
+                              </p>
+
+                              <p
+                                className={`mt-1 text-sm font-semibold ${status.text}`}
+                              >
+                                {status.label}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* ACTION */}
+                          <div className="mt-4 flex flex-wrap justify-end gap-2 border-t border-line pt-4">
                             <Link
                               to={`/booking/${booking.id}`}
-                              className="btn btn-p"
+                              className="btn"
                             >
                               <i
-                                className="fa-solid fa-credit-card"
+                                className="fa-solid fa-eye"
                                 aria-hidden="true"
                               />
 
-                              Lanjut Pembayaran
+                              Lihat Detail
                             </Link>
-                          )}
+
+                            {booking.status ===
+                              'pending' && (
+                                <Link
+                                  to={`/booking/${booking.id}`}
+                                  className="btn btn-p"
+                                >
+                                  <i
+                                    className="fa-solid fa-credit-card"
+                                    aria-hidden="true"
+                                  />
+
+                                  Lanjut Pembayaran
+                                </Link>
+                              )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  )
-                })}
+                    )
+                  }
+                )}
               </div>
             )}
 
@@ -525,47 +554,49 @@ export default function Account() {
               </div>
 
               <div className="card divide-y divide-line overflow-hidden">
+                {orders.map(
+                  (order) => (
+                    <div
+                      key={order.id}
+                      className="flex flex-wrap items-center gap-x-4 gap-y-2 p-3"
+                    >
+                      <b className="w-24 text-sm">
+                        {order.id}
+                      </b>
 
-                {orders.map((order) => (
-                  <div
-                    key={order.id}
-                    className="flex flex-wrap items-center gap-x-4 gap-y-2 p-3"
-                  >
+                      <span className="min-w-0 flex-1">
+                        <span className="font-medium">
+                          {order.judul}
+                        </span>
 
-                    <b className="w-24 text-sm">
-                      {order.id}
-                    </b>
+                        <br />
 
-                    <span className="min-w-0 flex-1">
-                      <span className="font-medium">
-                        {order.judul}
+                        <small className="text-mute">
+                          Berangkat{' '}
+                          {order.tgl}
+
+                          {order.metode && (
+                            <>
+                              {' · '}
+                              {order.metode}
+                            </>
+                          )}
+                        </small>
                       </span>
 
-                      <br />
-
-                      <small className="text-mute">
-                        Berangkat {order.tgl}
-
-                        {order.metode && (
-                          <>
-                            {' · '}
-                            {order.metode}
-                          </>
+                      <span className="font-semibold text-accent">
+                        {formatPrice(
+                          order.total,
+                          order.mataUang
                         )}
-                      </small>
-                    </span>
-
-                    <span className="font-semibold text-accent">
-                      {formatPrice(
-                        order.total,
-                        order.mataUang
-                      )}
-                    </span>
-                  </div>
-                ))}
+                      </span>
+                    </div>
+                  )
+                )}
               </div>
             </div>
           )}
+
         </section>
       </div>
     </>

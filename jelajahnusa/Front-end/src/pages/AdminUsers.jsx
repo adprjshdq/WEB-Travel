@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-const API_URL = 'http://localhost:5001/api'
+import API_URL from '../services/api'
 
 export default function AdminUsers() {
     const [users, setUsers] = useState([])

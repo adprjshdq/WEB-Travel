@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
+import API_URL from '../services/api'
 
 export default function Login() {
     const [email, setEmail] = useState('')
@@ -20,7 +21,7 @@ export default function Login() {
 
         try {
             const response = await fetch(
-                'http://localhost:5001/api/auth/login',
+                `${API_URL}/auth/login`,
                 {
                     method: 'POST',
                     headers: {
@@ -247,6 +248,7 @@ export default function Login() {
                                                 className="fa-solid fa-spinner fa-spin"
                                                 aria-hidden="true"
                                             />
+
                                             Sedang masuk...
                                         </>
                                     ) : (
@@ -255,6 +257,7 @@ export default function Login() {
                                                 className="fa-solid fa-right-to-bracket"
                                                 aria-hidden="true"
                                             />
+
                                             Masuk ke NusaTrip
                                         </>
                                     )}

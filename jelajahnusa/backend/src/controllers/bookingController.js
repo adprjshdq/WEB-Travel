@@ -1,13 +1,8 @@
 const pool = require('../config/database')
 
-/*
-|--------------------------------------------------------------------------
-| DAFTAR HARGA PAKET
-|--------------------------------------------------------------------------
-| Harga package menjadi sumber harga utama dari backend.
-| Frontend tidak dipercaya untuk menentukan total_price.
-|--------------------------------------------------------------------------
-*/
+// ========================================
+// DAFTAR HARGA PAKET
+// ========================================
 
 const packagePrices = {
     'Eksplorasi Pangandaran & Madasari': {
@@ -46,11 +41,84 @@ const packagePrices = {
     }
 }
 
-/*
-|--------------------------------------------------------------------------
-| GET SEMUA BOOKING - ADMIN
-|--------------------------------------------------------------------------
-*/
+// ========================================
+// HELPER
+// ========================================
+
+const isValidId = (id) => {
+    return (
+        /^\d+$/.test(String(id)) &&
+        Number(id) > 0
+    )
+}
+
+const isValidDate = (dateString) => {
+    if (
+        typeof dateString !== 'string' ||
+        !/^\d{4}-\d{2}-\d{2}$/.test(dateString)
+    ) {
+        return false
+    }
+
+    const [
+        year,
+        month,
+        day
+    ] = dateString
+        .split('-')
+        .map(Number)
+
+    const date = new Date(
+        Date.UTC(
+            year,
+            month - 1,
+            day
+        )
+    )
+
+    return (
+        date.getUTCFullYear() === year &&
+        date.getUTCMonth() === month - 1 &&
+        date.getUTCDate() === day
+    )
+}
+
+const getTodayString = () => {
+    const today = new Date()
+
+    return [
+        today.getFullYear(),
+        String(
+            today.getMonth() + 1
+        ).padStart(2, '0'),
+        String(
+            today.getDate()
+        ).padStart(2, '0')
+    ].join('-')
+}
+
+const isValidGuests = (guests) => {
+    return (
+        Number.isInteger(guests) &&
+        guests >= 1 &&
+        guests <= 20
+    )
+}
+
+const isValidNotes = (notes) => {
+    return (
+        notes === null ||
+        notes === undefined ||
+        (
+            typeof notes === 'string' &&
+            notes.trim().length <= 2000
+        )
+    )
+}
+
+// ========================================
+// GET SEMUA BOOKING - ADMIN
+// ========================================
 
 const getBookings = async (req, res) => {
     try {
@@ -93,18 +161,17 @@ const getBookings = async (req, res) => {
             ORDER BY b.created_at DESC
         `)
 
-        res.json({
+        return res.json({
             success: true,
             data: rows
         })
-
     } catch (error) {
         console.error(
             'Get bookings error:',
             error
         )
 
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             message:
                 'Gagal mengambil data booking'
@@ -112,11 +179,9 @@ const getBookings = async (req, res) => {
     }
 }
 
-/*
-|--------------------------------------------------------------------------
-| CREATE BOOKING
-|--------------------------------------------------------------------------
-*/
+// ========================================
+// CREATE BOOKING
+// ========================================
 
 const createBooking = async (req, res) => {
     try {
@@ -130,96 +195,9 @@ const createBooking = async (req, res) => {
             notes
         } = req.body
 
-        /*
-        |--------------------------------------------------------------------------
-        | VALIDASI DATA DASAR
-        |--------------------------------------------------------------------------
-        */
-
-        if (
-            !item_type ||
-            !item_name ||
-            !booking_date
-        ) {
-            return res.status(400).json({
-                success: false,
-                message:
-                    'Item, jenis booking, dan tanggal wajib diisi'
-            })
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | VALIDASI TANGGAL
-        |--------------------------------------------------------------------------
-        */
-
-        const dateRegex =
-            /^\d{4}-\d{2}-\d{2}$/
-
-        if (!dateRegex.test(booking_date)) {
-            return res.status(400).json({
-                success: false,
-                message:
-                    'Format tanggal booking tidak valid'
-            })
-        }
-
-        const [
-            year,
-            month,
-            day
-        ] = booking_date
-            .split('-')
-            .map(Number)
-
-        const selectedDate =
-            new Date(
-                Date.UTC(
-                    year,
-                    month - 1,
-                    day
-                )
-            )
-
-        const validCalendarDate =
-            selectedDate.getUTCFullYear() === year &&
-            selectedDate.getUTCMonth() === month - 1 &&
-            selectedDate.getUTCDate() === day
-
-        if (!validCalendarDate) {
-            return res.status(400).json({
-                success: false,
-                message:
-                    'Tanggal booking tidak valid'
-            })
-        }
-
-        const today = new Date()
-
-        const todayString = [
-            today.getFullYear(),
-            String(
-                today.getMonth() + 1
-            ).padStart(2, '0'),
-            String(
-                today.getDate()
-            ).padStart(2, '0')
-        ].join('-')
-
-        if (booking_date < todayString) {
-            return res.status(400).json({
-                success: false,
-                message:
-                    'Tanggal booking tidak boleh sebelum hari ini'
-            })
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | VALIDASI JENIS BOOKING
-        |--------------------------------------------------------------------------
-        */
+        // ========================================
+        // VALIDASI ITEM TYPE
+        // ========================================
 
         const allowedTypes = [
             'package',
@@ -228,7 +206,10 @@ const createBooking = async (req, res) => {
             'destination'
         ]
 
-        if (!allowedTypes.includes(item_type)) {
+        if (
+            typeof item_type !== 'string' ||
+            !allowedTypes.includes(item_type)
+        ) {
             return res.status(400).json({
                 success: false,
                 message:
@@ -236,20 +217,70 @@ const createBooking = async (req, res) => {
             })
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | VALIDASI JUMLAH TAMU
-        |--------------------------------------------------------------------------
-        */
-
-        const jumlahTamu =
-            Number(guests || 1)
+        // ========================================
+        // VALIDASI ITEM NAME
+        // ========================================
 
         if (
-            !Number.isInteger(jumlahTamu) ||
-            jumlahTamu < 1 ||
-            jumlahTamu > 20
+            typeof item_name !== 'string' ||
+            !item_name.trim()
         ) {
+            return res.status(400).json({
+                success: false,
+                message:
+                    'Nama item booking wajib diisi'
+            })
+        }
+
+        const requestedItemName =
+            item_name.trim()
+
+        if (
+            requestedItemName.length > 200
+        ) {
+            return res.status(400).json({
+                success: false,
+                message:
+                    'Nama item booking terlalu panjang'
+            })
+        }
+
+        // ========================================
+        // VALIDASI TANGGAL
+        // ========================================
+
+        if (!isValidDate(booking_date)) {
+            return res.status(400).json({
+                success: false,
+                message:
+                    'Tanggal booking tidak valid'
+            })
+        }
+
+        const todayString =
+            getTodayString()
+
+        if (
+            booking_date < todayString
+        ) {
+            return res.status(400).json({
+                success: false,
+                message:
+                    'Tanggal booking tidak boleh sebelum hari ini'
+            })
+        }
+
+        // ========================================
+        // VALIDASI JUMLAH TAMU
+        // ========================================
+
+        const jumlahTamu =
+            guests === undefined ||
+                guests === ''
+                ? 1
+                : Number(guests)
+
+        if (!isValidGuests(jumlahTamu)) {
             return res.status(400).json({
                 success: false,
                 message:
@@ -257,25 +288,51 @@ const createBooking = async (req, res) => {
             })
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | HARGA BOOKING
-        |--------------------------------------------------------------------------
-        */
+        // ========================================
+        // VALIDASI CATATAN
+        // ========================================
+
+        if (!isValidNotes(notes)) {
+            return res.status(400).json({
+                success: false,
+                message:
+                    'Catatan maksimal 2000 karakter'
+            })
+        }
+
+        const cleanNotes =
+            typeof notes === 'string'
+                ? notes.trim()
+                : null
+
+        // ========================================
+        // HARGA
+        // ========================================
 
         let hargaPerOrang = 0
-        let currency = 'IDR'
         let totalPrice = 0
+        let currency = 'IDR'
 
-        /*
-        |--------------------------------------------------------------------------
-        | PACKAGE
-        |--------------------------------------------------------------------------
-        */
+        let finalItemName =
+            requestedItemName
 
-        if (item_type === 'package') {
+        let finalDestinationId =
+            null
+
+        let finalTransportId =
+            null
+
+        // ========================================
+        // PACKAGE
+        // ========================================
+
+        if (
+            item_type === 'package'
+        ) {
             const selectedPackage =
-                packagePrices[item_name]
+                packagePrices[
+                requestedItemName
+                ]
 
             if (!selectedPackage) {
                 return res.status(404).json({
@@ -298,39 +355,42 @@ const createBooking = async (req, res) => {
                 jumlahTamu
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | DESTINATION
-        |--------------------------------------------------------------------------
-        */
+        // ========================================
+        // DESTINATION
+        // ========================================
 
         else if (
             item_type === 'destination'
         ) {
-            if (!destination_id) {
+            if (
+                !isValidId(
+                    destination_id
+                )
+            ) {
                 return res.status(400).json({
                     success: false,
                     message:
-                        'ID destinasi wajib diisi'
+                        'ID destinasi tidak valid'
                 })
             }
 
-            const [destination] =
-                await pool.query(
-                    `
-                    SELECT
-                        id,
-                        name,
-                        price
-                    FROM destinations
-                    WHERE id = ?
-                    LIMIT 1
-                    `,
-                    [destination_id]
-                )
+            const [
+                destinations
+            ] = await pool.query(
+                `
+                SELECT
+                    id,
+                    name,
+                    price
+                FROM destinations
+                WHERE id = ?
+                LIMIT 1
+                `,
+                [destination_id]
+            )
 
             if (
-                destination.length === 0
+                destinations.length === 0
             ) {
                 return res.status(404).json({
                     success: false,
@@ -339,12 +399,26 @@ const createBooking = async (req, res) => {
                 })
             }
 
+            const destination =
+                destinations[0]
+
+            // Nama dari database
+            // menjadi sumber kebenaran.
+            finalItemName =
+                destination.name
+
+            finalDestinationId =
+                destination.id
+
             hargaPerOrang =
                 Number(
-                    destination[0].price || 0
+                    destination.price || 0
                 )
 
             if (
+                !Number.isFinite(
+                    hargaPerOrang
+                ) ||
                 hargaPerOrang <= 0
             ) {
                 return res.status(400).json({
@@ -361,31 +435,36 @@ const createBooking = async (req, res) => {
                 jumlahTamu
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | HOTEL
-        |--------------------------------------------------------------------------
-        */
+        // ========================================
+        // HOTEL
+        // ========================================
 
         else if (
             item_type === 'hotel'
         ) {
-            const [hotel] =
-                await pool.query(
-                    `
-                    SELECT
-                        id,
-                        name,
-                        price
-                    FROM hotels
-                    WHERE name = ?
-                    LIMIT 1
-                    `,
-                    [item_name]
-                )
+            /*
+             * Saat ini tabel bookings belum memiliki
+             * hotel_id, jadi pencarian hotel tetap
+             * menggunakan nama.
+             */
+
+            const [
+                hotels
+            ] = await pool.query(
+                `
+                SELECT
+                    id,
+                    name,
+                    price
+                FROM hotels
+                WHERE name = ?
+                LIMIT 1
+                `,
+                [requestedItemName]
+            )
 
             if (
-                hotel.length === 0
+                hotels.length === 0
             ) {
                 return res.status(404).json({
                     success: false,
@@ -394,12 +473,21 @@ const createBooking = async (req, res) => {
                 })
             }
 
+            const hotel =
+                hotels[0]
+
+            finalItemName =
+                hotel.name
+
             hargaPerOrang =
                 Number(
-                    hotel[0].price || 0
+                    hotel.price || 0
                 )
 
             if (
+                !Number.isFinite(
+                    hargaPerOrang
+                ) ||
                 hargaPerOrang <= 0
             ) {
                 return res.status(400).json({
@@ -416,44 +504,44 @@ const createBooking = async (req, res) => {
                 jumlahTamu
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | TRANSPORT
-        |--------------------------------------------------------------------------
-        | Harga transportasi diambil langsung dari database.
-        | total_price dari frontend tidak dipercaya.
-        |--------------------------------------------------------------------------
-        */
+        // ========================================
+        // TRANSPORT
+        // ========================================
 
         else if (
             item_type === 'transport'
         ) {
-            if (!transport_id) {
+            if (
+                !isValidId(
+                    transport_id
+                )
+            ) {
                 return res.status(400).json({
                     success: false,
                     message:
-                        'ID transportasi wajib diisi'
+                        'ID transportasi tidak valid'
                 })
             }
 
-            const [transport] =
-                await pool.query(
-                    `
-                    SELECT
-                        id,
-                        jenis,
-                        rute,
-                        operator,
-                        price
-                    FROM transports
-                    WHERE id = ?
-                    LIMIT 1
-                    `,
-                    [transport_id]
-                )
+            const [
+                transports
+            ] = await pool.query(
+                `
+                SELECT
+                    id,
+                    jenis,
+                    rute,
+                    operator,
+                    price
+                FROM transports
+                WHERE id = ?
+                LIMIT 1
+                `,
+                [transport_id]
+            )
 
             if (
-                transport.length === 0
+                transports.length === 0
             ) {
                 return res.status(404).json({
                     success: false,
@@ -462,12 +550,28 @@ const createBooking = async (req, res) => {
                 })
             }
 
+            const transport =
+                transports[0]
+
+            finalTransportId =
+                transport.id
+
+            /*
+             * Nama booking dibentuk dari
+             * data database.
+             */
+            finalItemName =
+                `${transport.jenis} - ${transport.rute}`
+
             hargaPerOrang =
                 Number(
-                    transport[0].price || 0
+                    transport.price || 0
                 )
 
             if (
+                !Number.isFinite(
+                    hargaPerOrang
+                ) ||
                 hargaPerOrang <= 0
             ) {
                 return res.status(400).json({
@@ -484,13 +588,20 @@ const createBooking = async (req, res) => {
                 jumlahTamu
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | VALIDASI HASIL HARGA
-        |--------------------------------------------------------------------------
-        */
+        // ========================================
+        // VALIDASI TOTAL
+        // ========================================
 
-        if (totalPrice <= 0) {
+        if (
+            !Number.isFinite(
+                hargaPerOrang
+            ) ||
+            !Number.isFinite(
+                totalPrice
+            ) ||
+            hargaPerOrang <= 0 ||
+            totalPrice <= 0
+        ) {
             return res.status(400).json({
                 success: false,
                 message:
@@ -498,11 +609,9 @@ const createBooking = async (req, res) => {
             })
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | SIMPAN BOOKING
-        |--------------------------------------------------------------------------
-        */
+        // ========================================
+        // SIMPAN BOOKING
+        // ========================================
 
         const [result] =
             await pool.query(
@@ -524,58 +633,46 @@ const createBooking = async (req, res) => {
                 `,
                 [
                     req.user.id,
-                    destination_id || null,
-                    transport_id || null,
+                    finalDestinationId,
+                    finalTransportId,
                     item_type,
-                    item_name,
+                    finalItemName,
                     booking_date,
                     jumlahTamu,
                     totalPrice,
                     currency,
-                    notes || null
+                    cleanNotes || null
                 ]
             )
 
-        /*
-        |--------------------------------------------------------------------------
-        | RESPONSE
-        |--------------------------------------------------------------------------
-        */
+        // ========================================
+        // RESPONSE
+        // ========================================
 
-        res.status(201).json({
+        return res.status(201).json({
             success: true,
-
             message:
                 'Booking berhasil dibuat',
-
             data: {
-                id:
-                    result.insertId,
-
-                item_type,
-
-                item_name,
-
-                guests:
-                    jumlahTamu,
-
+                id: result.insertId,
+                item_type: item_type,
+                item_name: finalItemName,
+                booking_date: booking_date,
+                guests: jumlahTamu,
                 price_per_person:
                     hargaPerOrang,
-
                 total_price:
                     totalPrice,
-
-                currency
+                currency: currency
             }
         })
-
     } catch (error) {
         console.error(
             'Create booking error:',
             error
         )
 
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             message:
                 'Gagal membuat booking'
@@ -583,11 +680,9 @@ const createBooking = async (req, res) => {
     }
 }
 
-/*
-|--------------------------------------------------------------------------
-| UPDATE STATUS BOOKING - ADMIN
-|--------------------------------------------------------------------------
-*/
+// ========================================
+// UPDATE STATUS BOOKING - ADMIN
+// ========================================
 
 const updateBookingStatus = async (
     req,
@@ -599,6 +694,14 @@ const updateBookingStatus = async (
 
         const { status } =
             req.body
+
+        if (!isValidId(id)) {
+            return res.status(400).json({
+                success: false,
+                message:
+                    'ID booking tidak valid'
+            })
+        }
 
         const allowedStatus = [
             'pending',
@@ -641,16 +744,18 @@ const updateBookingStatus = async (
             })
         }
 
-        res.json({
+        return res.json({
             success: true,
             message:
                 'Status booking berhasil diperbarui'
         })
-
     } catch (error) {
-        console.error(error)
+        console.error(
+            'Update booking status error:',
+            error
+        )
 
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             message:
                 'Gagal memperbarui booking'
@@ -658,11 +763,9 @@ const updateBookingStatus = async (
     }
 }
 
-/*
-|--------------------------------------------------------------------------
-| DELETE BOOKING - ADMIN
-|--------------------------------------------------------------------------
-*/
+// ========================================
+// DELETE BOOKING - ADMIN
+// ========================================
 
 const deleteBooking = async (
     req,
@@ -671,6 +774,14 @@ const deleteBooking = async (
     try {
         const { id } =
             req.params
+
+        if (!isValidId(id)) {
+            return res.status(400).json({
+                success: false,
+                message:
+                    'ID booking tidak valid'
+            })
+        }
 
         const [result] =
             await pool.query(
@@ -691,16 +802,18 @@ const deleteBooking = async (
             })
         }
 
-        res.json({
+        return res.json({
             success: true,
             message:
                 'Booking berhasil dihapus'
         })
-
     } catch (error) {
-        console.error(error)
+        console.error(
+            'Delete booking error:',
+            error
+        )
 
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             message:
                 'Gagal menghapus booking'
@@ -708,11 +821,9 @@ const deleteBooking = async (
     }
 }
 
-/*
-|--------------------------------------------------------------------------
-| BAYAR BOOKING
-|--------------------------------------------------------------------------
-*/
+// ========================================
+// BAYAR BOOKING
+// ========================================
 
 const payBooking = async (
     req,
@@ -721,6 +832,14 @@ const payBooking = async (
     try {
         const { id } =
             req.params
+
+        if (!isValidId(id)) {
+            return res.status(400).json({
+                success: false,
+                message:
+                    'ID booking tidak valid'
+            })
+        }
 
         const [result] =
             await pool.query(
@@ -747,16 +866,18 @@ const payBooking = async (
             })
         }
 
-        res.json({
+        return res.json({
             success: true,
             message:
                 'Pembayaran berhasil dikonfirmasi'
         })
-
     } catch (error) {
-        console.error(error)
+        console.error(
+            'Pay booking error:',
+            error
+        )
 
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             message:
                 'Gagal memproses pembayaran'
@@ -764,11 +885,9 @@ const payBooking = async (
     }
 }
 
-/*
-|--------------------------------------------------------------------------
-| BOOKING MILIK USER
-|--------------------------------------------------------------------------
-*/
+// ========================================
+// BOOKING MILIK USER
+// ========================================
 
 const getMyBookings = async (
     req,
@@ -808,15 +927,17 @@ const getMyBookings = async (
                 [req.user.id]
             )
 
-        res.json({
+        return res.json({
             success: true,
             data: rows
         })
-
     } catch (error) {
-        console.error(error)
+        console.error(
+            'Get my bookings error:',
+            error
+        )
 
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             message:
                 'Gagal mengambil riwayat booking'
@@ -824,11 +945,9 @@ const getMyBookings = async (
     }
 }
 
-/*
-|--------------------------------------------------------------------------
-| DETAIL BOOKING MILIK USER
-|--------------------------------------------------------------------------
-*/
+// ========================================
+// DETAIL BOOKING MILIK USER
+// ========================================
 
 const getMyBookingDetail = async (
     req,
@@ -837,6 +956,14 @@ const getMyBookingDetail = async (
     try {
         const { id } =
             req.params
+
+        if (!isValidId(id)) {
+            return res.status(400).json({
+                success: false,
+                message:
+                    'ID booking tidak valid'
+            })
+        }
 
         const [rows] =
             await pool.query(
@@ -885,15 +1012,17 @@ const getMyBookingDetail = async (
             })
         }
 
-        res.json({
+        return res.json({
             success: true,
             data: rows[0]
         })
-
     } catch (error) {
-        console.error(error)
+        console.error(
+            'Get booking detail error:',
+            error
+        )
 
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             message:
                 'Gagal mengambil detail booking'
@@ -901,11 +1030,9 @@ const getMyBookingDetail = async (
     }
 }
 
-/*
-|--------------------------------------------------------------------------
-| BATALKAN BOOKING
-|--------------------------------------------------------------------------
-*/
+// ========================================
+// BATALKAN BOOKING
+// ========================================
 
 const cancelMyBooking = async (
     req,
@@ -914,6 +1041,14 @@ const cancelMyBooking = async (
     try {
         const { id } =
             req.params
+
+        if (!isValidId(id)) {
+            return res.status(400).json({
+                success: false,
+                message:
+                    'ID booking tidak valid'
+            })
+        }
 
         const [result] =
             await pool.query(
@@ -940,16 +1075,18 @@ const cancelMyBooking = async (
             })
         }
 
-        res.json({
+        return res.json({
             success: true,
             message:
                 'Booking berhasil dibatalkan'
         })
-
     } catch (error) {
-        console.error(error)
+        console.error(
+            'Cancel booking error:',
+            error
+        )
 
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             message:
                 'Gagal membatalkan booking'
@@ -957,11 +1094,9 @@ const cancelMyBooking = async (
     }
 }
 
-/*
-|--------------------------------------------------------------------------
-| EXPORT
-|--------------------------------------------------------------------------
-*/
+// ========================================
+// EXPORT
+// ========================================
 
 module.exports = {
     getBookings,

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { PageHead, rupiah } from '../components/ui'
 
-const API_URL = 'http://localhost:5001/api'
+import API_URL from '../services/api'
 
 const metode = [
   ['BCA Virtual Account', 'fa-building-columns'],

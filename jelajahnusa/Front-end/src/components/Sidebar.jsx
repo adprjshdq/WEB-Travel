@@ -252,7 +252,7 @@ export default function Sidebar({ open, onClose }) {
         {/* Footer Sidebar */}
         <div className="p-3 border-t border-line">
           <p className="text-[11px] text-mute text-center">
-            NusakambanganTrip
+            NUSATRAVEL
           </p>
         </div>
       </aside>

@@ -19,30 +19,31 @@ const storage = multer.diskStorage({
     },
 
     filename: (req, file, cb) => {
-        const ext =
-            path.extname(
-                file.originalname
+        const ext = path
+            .extname(file.originalname)
+            .toLowerCase()
+
+        const name = path
+            .basename(
+                file.originalname,
+                ext
+            )
+            .toLowerCase()
+            .replace(
+                /[^a-z0-9]+/g,
+                '-'
+            )
+            .replace(
+                /^-+|-+$/g,
+                ''
             )
 
-        const name =
-            path
-                .basename(
-                    file.originalname,
-                    ext
-                )
-                .toLowerCase()
-                .replace(
-                    /[^a-z0-9]+/g,
-                    '-'
-                )
-                .replace(
-                    /^-+|-+$/g,
-                    ''
-                )
+        const safeName =
+            name || 'image'
 
         cb(
             null,
-            `upload-${Date.now()}-${name}${ext.toLowerCase()}`
+            `upload-${Date.now()}-${safeName}${ext}`
         )
     }
 })
@@ -54,7 +55,6 @@ const fileFilter = (
 ) => {
     const allowedTypes = [
         'image/jpeg',
-        'image/jpg',
         'image/png',
         'image/webp'
     ]
@@ -77,9 +77,10 @@ const fileFilter = (
 const upload = multer({
     storage,
     fileFilter,
+
     limits: {
-        fileSize:
-            5 * 1024 * 1024
+        fileSize: 5 * 1024 * 1024,
+        files: 1
     }
 })
 

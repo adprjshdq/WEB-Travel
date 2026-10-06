@@ -4,7 +4,7 @@ import { PageHead } from '../components/ui'
 
 import { getImageUrl } from '../utils/imageUrl'
 
-const API_URL = 'http://localhost:5001/api'
+import API_URL from '../services/api'
 
 const tinggi = [
   'h-40',

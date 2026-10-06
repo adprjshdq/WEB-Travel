@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { Field, PageHead, rupiah } from '../components/ui'
 
-const API_URL = 'http://localhost:5001/api'
+import API_URL from '../services/api'
 
 export default function Booking() {
   const { booking, setBooking, user } = useApp()

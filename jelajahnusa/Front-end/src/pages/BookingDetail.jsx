@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 
 import { PageHead, rupiah } from '../components/ui'
 
-const API_URL = 'http://localhost:5001/api'
+import API_URL from '../services/api'
 
 export default function BookingDetail() {
     const { id } = useParams()

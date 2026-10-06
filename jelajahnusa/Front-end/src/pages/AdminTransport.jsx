@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { rupiah } from '../components/ui'
 
-const API_URL = 'http://localhost:5001/api'
+import API_URL from '../services/api'
 
 const emptyForm = {
     jenis: '',

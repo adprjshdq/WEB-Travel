@@ -1,6 +1,9 @@
 const express = require('express')
 const cors = require('cors')
-require('dotenv').config()
+const dotenv = require('dotenv')
+const path = require('path')
+
+dotenv.config
 
 const pool = require('./src/config/database')
 
@@ -13,24 +16,85 @@ const adminHotelRoutes = require('./src/routes/adminHotelRoutes')
 const transportRoutes = require('./src/routes/transportRoutes')
 const adminTransportRoutes = require('./src/routes/adminTransportRoutes')
 
-const path = require('path')
-
 const {
     authenticate,
     isAdmin
 } = require('./src/middleware/authMiddleware')
 
+const {
+    notFound,
+    errorHandler
+} = require('./src/middleware/errorMiddleware')
+
 const app = express()
 
+// ========================================
+// CONFIGURATION
+// ========================================
 
-// ===============================
+const PORT = process.env.PORT || 5001
+
+const allowedOrigins = (
+    process.env.CORS_ORIGIN ||
+    'http://localhost:5173'
+)
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean)
+
+// ========================================
 // MIDDLEWARE
-// ===============================
+// ========================================
 
-app.use(cors())
+// CORS
+app.use(
+    cors({
+        origin: (origin, callback) => {
+            // Izinkan request tanpa Origin
+            // seperti Postman atau server-to-server
+            if (!origin) {
+                return callback(null, true)
+            }
 
-app.use(express.json())
+            if (allowedOrigins.includes(origin)) {
+                return callback(null, true)
+            }
 
+            return callback(
+                new Error('Origin tidak diizinkan oleh CORS')
+            )
+        },
+        methods: [
+            'GET',
+            'POST',
+            'PUT',
+            'DELETE',
+            'OPTIONS'
+        ],
+        allowedHeaders: [
+            'Content-Type',
+            'Authorization'
+        ],
+        optionsSuccessStatus: 204
+    })
+)
+
+// JSON body
+app.use(
+    express.json({
+        limit: '1mb'
+    })
+)
+
+// URL encoded body
+app.use(
+    express.urlencoded({
+        extended: true,
+        limit: '1mb'
+    })
+)
+
+// Static uploaded images
 app.use(
     '/uploads',
     express.static(
@@ -38,16 +102,40 @@ app.use(
     )
 )
 
-
-// ===============================
-// ROUTES
-// ===============================
+// ========================================
+// PUBLIC ROUTES
+// ========================================
 
 // Auth
 app.use(
     '/api/auth',
     authRoutes
 )
+
+// Public Hotels
+app.use(
+    '/api/hotels',
+    hotelRoutes
+)
+
+// Public Transport
+app.use(
+    '/api/transports',
+    transportRoutes
+)
+
+// ========================================
+// BOOKING ROUTES
+// ========================================
+
+app.use(
+    '/api/bookings',
+    bookingRoutes
+)
+
+// ========================================
+// ADMIN ROUTES
+// ========================================
 
 // Admin Destinations
 app.use(
@@ -61,28 +149,10 @@ app.use(
     adminUserRoutes
 )
 
-// Bookings
-app.use(
-    '/api/bookings',
-    bookingRoutes
-)
-
-// Public Hotels
-app.use(
-    '/api/hotels',
-    hotelRoutes
-)
-
 // Admin Hotels
 app.use(
     '/api/admin/hotels',
     adminHotelRoutes
-)
-
-// Public Transport
-app.use(
-    '/api/transports',
-    transportRoutes
 )
 
 // Admin Transport
@@ -91,10 +161,9 @@ app.use(
     adminTransportRoutes
 )
 
-
-// ===============================
+// ========================================
 // API TEST
-// ===============================
+// ========================================
 
 app.get(
     '/api',
@@ -107,10 +176,9 @@ app.get(
     }
 )
 
-
-// ===============================
+// ========================================
 // ADMIN TEST
-// ===============================
+// ========================================
 
 app.get(
     '/api/admin/test',
@@ -126,56 +194,64 @@ app.get(
     }
 )
 
-
-// ===============================
+// ========================================
 // DATABASE TEST
-// ===============================
+// ========================================
 
-app.get(
-    '/api/places',
-    async (req, res) => {
-        try {
-            const [rows] =
-                await pool.query(
-                    'SELECT 1 AS connected'
-                )
+app.get('/api/health', async (req, res) => {
+    try {
+        await pool.query('SELECT 1')
 
-            res.json({
-                success: true,
-                data: rows
-            })
-        } catch (error) {
-            console.error(error)
+        return res.json({
+            success: true,
+            message: 'API dan database berjalan normal'
+        })
+    } catch (error) {
+        console.error(
+            'Health check error:',
+            error
+        )
 
-            res.status(500).json({
-                success: false,
-                message:
-                    'Terjadi kesalahan pada server'
-            })
-        }
+        return res.status(503).json({
+            success: false,
+            message: 'Database tidak tersedia'
+        })
     }
-)
+})
 
-
-// ===============================
-// DESTINATIONS
-// ===============================
+// ========================================
+// PUBLIC DESTINATIONS
+// ========================================
 
 app.get(
     '/api/destinations',
     async (req, res) => {
         try {
             const [rows] =
-                await pool.query(
-                    'SELECT * FROM destinations'
-                )
+                await pool.query(`
+                    SELECT
+                        id,
+                        name,
+                        location,
+                        description,
+                        image,
+                        category,
+                        rating,
+                        price,
+                        created_at
+                    FROM destinations
+                    ORDER BY id ASC
+                `)
 
             res.json({
                 success: true,
                 data: rows
             })
         } catch (error) {
-            console.error(error)
+            console.error(
+                'Get destinations error:',
+                error
+            )
 
             res.status(500).json({
                 success: false,
@@ -186,10 +262,9 @@ app.get(
     }
 )
 
-
-// ===============================
+// ========================================
 // ADMIN STATS
-// ===============================
+// ========================================
 
 app.get(
     '/api/admin/stats',
@@ -197,25 +272,26 @@ app.get(
     isAdmin,
     async (req, res) => {
         try {
-
             const [users] =
-                await pool.query(
-                    'SELECT COUNT(*) AS total FROM users'
-                )
+                await pool.query(`
+                    SELECT COUNT(*) AS total
+                    FROM users
+                `)
 
             const [destinations] =
-                await pool.query(
-                    'SELECT COUNT(*) AS total FROM destinations'
-                )
+                await pool.query(`
+                    SELECT COUNT(*) AS total
+                    FROM destinations
+                `)
 
             const [bookings] =
-                await pool.query(
-                    'SELECT COUNT(*) AS total FROM bookings'
-                )
+                await pool.query(`
+                    SELECT COUNT(*) AS total
+                    FROM bookings
+                `)
 
             const [revenue] =
-                await pool.query(
-                    `
+                await pool.query(`
                     SELECT
                         COALESCE(
                             SUM(total_price),
@@ -223,30 +299,35 @@ app.get(
                         ) AS total
                     FROM bookings
                     WHERE status = 'confirmed'
-                    `
-                )
+                `)
 
             res.json({
                 success: true,
-
                 data: {
                     totalUsers:
-                        users[0].total,
+                        Number(users[0].total),
 
                     totalDestinations:
-                        destinations[0].total,
+                        Number(
+                            destinations[0].total
+                        ),
 
                     totalBookings:
-                        bookings[0].total,
+                        Number(
+                            bookings[0].total
+                        ),
 
                     totalRevenue:
-                        revenue[0].total
+                        Number(
+                            revenue[0].total
+                        )
                 }
             })
-
         } catch (error) {
-
-            console.error(error)
+            console.error(
+                'Admin stats error:',
+                error
+            )
 
             res.status(500).json({
                 success: false,
@@ -257,19 +338,31 @@ app.get(
     }
 )
 
+// ========================================
+// 404 HANDLER
+// ========================================
 
-// ===============================
-// SERVER
-// ===============================
+app.use(notFound)
 
-const PORT =
-    process.env.PORT || 5001
+// ========================================
+// GLOBAL ERROR HANDLER
+// ========================================
+
+app.use(errorHandler)
+
+// ========================================
+// START SERVER
+// ========================================
 
 app.listen(
     PORT,
     () => {
         console.log(
             `Server berjalan di http://localhost:${PORT}`
+        )
+
+        console.log(
+            `CORS aktif untuk: ${allowedOrigins.join(', ')}`
         )
     }
 )

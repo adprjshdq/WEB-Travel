@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 
-const API_URL = 'http://localhost:5001/api'
-const SERVER_URL = 'http://localhost:5001'
+import API_URL from '../services/api'
+
+const SERVER_URL = API_URL.replace(/\/api\/?$/, '')
 
 const emptyForm = {
     name: '',
@@ -16,10 +17,8 @@ export default function AdminDestinations() {
     const [destinations, setDestinations] = useState([])
     const [form, setForm] = useState(emptyForm)
     const [editingId, setEditingId] = useState(null)
-
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
-
     const [message, setMessage] = useState('')
     const [preview, setPreview] = useState('')
     const [search, setSearch] = useState('')
@@ -29,6 +28,7 @@ export default function AdminDestinations() {
     // =========================
     // IMAGE URL
     // =========================
+
     const getImageUrl = (image) => {
         if (!image) {
             return ''
@@ -51,6 +51,7 @@ export default function AdminDestinations() {
     // =========================
     // LOAD DESTINATIONS
     // =========================
+
     const loadDestinations = async () => {
         try {
             setLoading(true)
@@ -76,7 +77,11 @@ export default function AdminDestinations() {
             setDestinations(result.data || [])
         } catch (error) {
             console.error(error)
-            setMessage(error.message)
+
+            setMessage(
+                error.message ||
+                'Gagal mengambil data destinasi'
+            )
         } finally {
             setLoading(false)
         }
@@ -89,6 +94,7 @@ export default function AdminDestinations() {
     // =========================
     // FORM CHANGE
     // =========================
+
     const handleChange = (e) => {
         const { name, value } = e.target
 
@@ -101,6 +107,7 @@ export default function AdminDestinations() {
     // =========================
     // IMAGE CHANGE
     // =========================
+
     const handleImageChange = (e) => {
         const file = e.target.files?.[0]
 
@@ -121,6 +128,7 @@ export default function AdminDestinations() {
             )
 
             e.target.value = ''
+
             return
         }
 
@@ -130,6 +138,7 @@ export default function AdminDestinations() {
             )
 
             e.target.value = ''
+
             return
         }
 
@@ -140,7 +149,8 @@ export default function AdminDestinations() {
 
         setMessage('')
 
-        const imageUrl = URL.createObjectURL(file)
+        const imageUrl =
+            URL.createObjectURL(file)
 
         setPreview(imageUrl)
     }
@@ -148,6 +158,7 @@ export default function AdminDestinations() {
     // =========================
     // RESET FORM
     // =========================
+
     const resetForm = () => {
         setForm(emptyForm)
         setEditingId(null)
@@ -167,6 +178,7 @@ export default function AdminDestinations() {
     // =========================
     // EDIT
     // =========================
+
     const handleEdit = (destination) => {
         setEditingId(destination.id)
 
@@ -176,13 +188,17 @@ export default function AdminDestinations() {
             description:
                 destination.description || '',
             image: null,
-            category: destination.category || '',
-            rating: destination.rating || ''
+            category:
+                destination.category || '',
+            rating:
+                destination.rating || ''
         })
 
         if (destination.image) {
             setPreview(
-                getImageUrl(destination.image)
+                getImageUrl(
+                    destination.image
+                )
             )
         } else {
             setPreview('')
@@ -199,6 +215,7 @@ export default function AdminDestinations() {
     // =========================
     // SUBMIT
     // =========================
+
     const handleSubmit = async (e) => {
         e.preventDefault()
 
@@ -296,6 +313,7 @@ export default function AdminDestinations() {
     // =========================
     // DELETE
     // =========================
+
     const handleDelete = async (id) => {
         const yakin = window.confirm(
             'Yakin ingin menghapus destinasi ini?'
@@ -334,37 +352,43 @@ export default function AdminDestinations() {
             await loadDestinations()
         } catch (error) {
             console.error(error)
-            setMessage(error.message)
+
+            setMessage(
+                error.message ||
+                'Gagal menghapus destinasi'
+            )
         }
     }
 
     // =========================
     // SEARCH
     // =========================
+
     const filteredDestinations =
-        destinations.filter((destination) => {
-            const keyword =
-                search.toLowerCase()
+        destinations.filter(
+            (destination) => {
+                const keyword =
+                    search.toLowerCase()
 
-            return (
-                destination.name
-                    ?.toLowerCase()
-                    .includes(keyword) ||
-
-                destination.location
-                    ?.toLowerCase()
-                    .includes(keyword) ||
-
-                destination.category
-                    ?.toLowerCase()
-                    .includes(keyword)
-            )
-        })
+                return (
+                    destination.name
+                        ?.toLowerCase()
+                        .includes(keyword) ||
+                    destination.location
+                        ?.toLowerCase()
+                        .includes(keyword) ||
+                    destination.category
+                        ?.toLowerCase()
+                        .includes(keyword)
+                )
+            }
+        )
 
     return (
         <div className="space-y-8">
 
-            {/* ================= HEADER ================= */}
+            {/* HEADER */}
+
             <div>
                 <p className="text-accent text-sm font-medium">
                     Administrator
@@ -379,8 +403,8 @@ export default function AdminDestinations() {
                 </p>
             </div>
 
+            {/* FORM */}
 
-            {/* ================= FORM ================= */}
             <section className="card p-5">
 
                 <div className="flex items-center justify-between gap-4 mb-5">
@@ -388,15 +412,18 @@ export default function AdminDestinations() {
                     <div className="flex items-center gap-3">
 
                         <div className="w-11 h-11 rounded-xl bg-line flex items-center justify-center">
+
                             <i
                                 className={`fa-solid ${editingId
                                         ? 'fa-pen-to-square'
                                         : 'fa-location-dot'
                                     } text-accent`}
                             />
+
                         </div>
 
                         <div>
+
                             <h2 className="text-xl font-bold">
                                 {editingId
                                     ? 'Edit Destinasi'
@@ -408,6 +435,7 @@ export default function AdminDestinations() {
                                     ? 'Perbarui informasi destinasi.'
                                     : 'Tambahkan destinasi wisata baru.'}
                             </p>
+
                         </div>
 
                     </div>
@@ -425,14 +453,15 @@ export default function AdminDestinations() {
 
                 </div>
 
-
                 <form
                     onSubmit={handleSubmit}
                     className="grid md:grid-cols-2 gap-4"
                 >
 
                     {/* NAMA */}
+
                     <div>
+
                         <label className="block text-sm text-mute mb-2">
                             Nama destinasi
                         </label>
@@ -446,11 +475,13 @@ export default function AdminDestinations() {
                             required
                             className="input w-full"
                         />
+
                     </div>
 
-
                     {/* LOKASI */}
+
                     <div>
+
                         <label className="block text-sm text-mute mb-2">
                             Lokasi
                         </label>
@@ -464,11 +495,13 @@ export default function AdminDestinations() {
                             required
                             className="input w-full"
                         />
+
                     </div>
 
-
                     {/* KATEGORI */}
+
                     <div>
+
                         <label className="block text-sm text-mute mb-2">
                             Kategori
                         </label>
@@ -481,16 +514,19 @@ export default function AdminDestinations() {
                             placeholder="Contoh: Pantai"
                             className="input w-full"
                         />
+
                     </div>
 
-
                     {/* RATING */}
+
                     <div>
+
                         <label className="block text-sm text-mute mb-2">
                             Rating
                         </label>
 
                         <div className="relative">
+
                             <input
                                 type="number"
                                 name="rating"
@@ -506,11 +542,13 @@ export default function AdminDestinations() {
                             <span className="absolute right-4 top-1/2 -translate-y-1/2 text-accent">
                                 ⭐
                             </span>
+
                         </div>
+
                     </div>
 
-
                     {/* UPLOAD */}
+
                     <div className="md:col-span-2">
 
                         <label className="block text-sm text-mute mb-2">
@@ -536,8 +574,8 @@ export default function AdminDestinations() {
 
                     </div>
 
-
                     {/* PREVIEW */}
+
                     {preview && (
                         <div className="md:col-span-2">
 
@@ -554,11 +592,15 @@ export default function AdminDestinations() {
                                 />
 
                                 <div className="absolute bottom-0 left-0 right-0 bg-black/60 px-3 py-2">
+
                                     <p className="text-xs text-white">
+
                                         {form.image
                                             ? form.image.name
                                             : 'Gambar saat ini'}
+
                                     </p>
+
                                 </div>
 
                             </div>
@@ -566,8 +608,8 @@ export default function AdminDestinations() {
                         </div>
                     )}
 
-
                     {/* DESKRIPSI */}
+
                     <div className="md:col-span-2">
 
                         <label className="block text-sm text-mute mb-2">
@@ -585,8 +627,8 @@ export default function AdminDestinations() {
 
                     </div>
 
-
                     {/* BUTTON */}
+
                     <div className="md:col-span-2 flex flex-wrap gap-2 pt-1">
 
                         <button
@@ -594,6 +636,7 @@ export default function AdminDestinations() {
                             className="btn btn-p"
                             disabled={saving}
                         >
+
                             <i
                                 className={`fa-solid ${saving
                                         ? 'fa-spinner fa-spin'
@@ -608,6 +651,7 @@ export default function AdminDestinations() {
                                 : editingId
                                     ? 'Simpan Perubahan'
                                     : 'Upload & Tambah Destinasi'}
+
                         </button>
 
                         {editingId && (
@@ -625,8 +669,8 @@ export default function AdminDestinations() {
 
                 </form>
 
-
                 {/* MESSAGE */}
+
                 {message && (
                     <div className="mt-5 p-3 rounded-xl bg-line flex items-center gap-3">
 
@@ -644,14 +688,16 @@ export default function AdminDestinations() {
 
             </section>
 
+            {/* LIST */}
 
-            {/* ================= LIST ================= */}
             <section className="card p-5">
 
                 {/* LIST HEADER */}
+
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
 
                     <div>
+
                         <h2 className="text-xl font-bold">
                             Daftar Destinasi
                         </h2>
@@ -659,10 +705,11 @@ export default function AdminDestinations() {
                         <p className="text-mute text-sm mt-1">
                             {destinations.length} destinasi terdaftar
                         </p>
+
                     </div>
 
-
                     {/* SEARCH */}
+
                     <div className="relative w-full lg:w-80">
 
                         <i className="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-mute" />
@@ -673,7 +720,9 @@ export default function AdminDestinations() {
                             placeholder="Cari destinasi..."
                             value={search}
                             onChange={(e) =>
-                                setSearch(e.target.value)
+                                setSearch(
+                                    e.target.value
+                                )
                             }
                         />
 
@@ -681,8 +730,8 @@ export default function AdminDestinations() {
 
                 </div>
 
-
                 {/* LOADING */}
+
                 {loading && (
                     <div className="py-10 text-center">
 
@@ -695,14 +744,16 @@ export default function AdminDestinations() {
                     </div>
                 )}
 
-
                 {/* EMPTY */}
+
                 {!loading &&
                     filteredDestinations.length === 0 && (
                         <div className="py-10 text-center">
 
                             <div className="w-14 h-14 rounded-full bg-line flex items-center justify-center mx-auto">
+
                                 <i className="fa-solid fa-map-location-dot text-mute text-xl" />
+
                             </div>
 
                             <p className="font-semibold mt-4">
@@ -720,8 +771,8 @@ export default function AdminDestinations() {
                         </div>
                     )}
 
-
                 {/* DESTINATION LIST */}
+
                 {!loading &&
                     filteredDestinations.length > 0 && (
                         <div className="grid lg:grid-cols-2 gap-4 mt-5">
@@ -734,6 +785,7 @@ export default function AdminDestinations() {
                                     >
 
                                         {/* IMAGE */}
+
                                         <div className="relative h-48">
 
                                             {destination.image ? (
@@ -748,11 +800,14 @@ export default function AdminDestinations() {
                                                 />
                                             ) : (
                                                 <div className="w-full h-full bg-line flex items-center justify-center">
+
                                                     <i className="fa-solid fa-image text-mute text-2xl" />
+
                                                 </div>
                                             )}
 
                                             {/* CATEGORY */}
+
                                             {destination.category && (
                                                 <span className="absolute top-3 left-3 px-3 py-1 rounded-full bg-black/70 text-white text-xs font-semibold">
                                                     {
@@ -762,6 +817,7 @@ export default function AdminDestinations() {
                                             )}
 
                                             {/* RATING */}
+
                                             <span className="absolute top-3 right-3 px-3 py-1 rounded-full bg-black/70 text-white text-xs font-semibold">
                                                 ⭐{' '}
                                                 {destination.rating ||
@@ -770,8 +826,8 @@ export default function AdminDestinations() {
 
                                         </div>
 
-
                                         {/* CONTENT */}
+
                                         <div className="p-4">
 
                                             <div className="flex items-start justify-between gap-3">
@@ -785,19 +841,21 @@ export default function AdminDestinations() {
                                                     </h3>
 
                                                     <p className="text-mute text-sm mt-1">
+
                                                         <i className="fa-solid fa-location-dot mr-1" />
 
                                                         {
                                                             destination.location
                                                         }
+
                                                     </p>
 
                                                 </div>
 
                                             </div>
 
-
                                             {/* DESCRIPTION */}
+
                                             {destination.description && (
                                                 <p className="text-mute text-sm mt-3 line-clamp-2">
                                                     {
@@ -806,8 +864,8 @@ export default function AdminDestinations() {
                                                 </p>
                                             )}
 
-
                                             {/* ACTION */}
+
                                             <div className="flex gap-2 mt-4 pt-4 border-t border-line">
 
                                                 <button
@@ -820,7 +878,6 @@ export default function AdminDestinations() {
                                                     className="btn flex-1"
                                                 >
                                                     <i className="fa-solid fa-pen" />
-
                                                     Edit
                                                 </button>
 
@@ -834,7 +891,6 @@ export default function AdminDestinations() {
                                                     className="btn flex-1"
                                                 >
                                                     <i className="fa-solid fa-trash" />
-
                                                     Hapus
                                                 </button>
 

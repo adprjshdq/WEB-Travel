@@ -1,15 +1,14 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import API_URL from '../services/api'
 
 export default function Register() {
     const [name, setName] = useState('')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [confirmPassword, setConfirmPassword] = useState('')
-
     const [showPassword, setShowPassword] = useState(false)
     const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-
     const [error, setError] = useState('')
     const [success, setSuccess] = useState('')
     const [loading, setLoading] = useState(false)
@@ -40,7 +39,7 @@ export default function Register() {
 
         try {
             const response = await fetch(
-                'http://localhost:5001/api/auth/register',
+                `${API_URL}/auth/register`,
                 {
                     method: 'POST',
                     headers: {
@@ -70,6 +69,7 @@ export default function Register() {
             setTimeout(() => {
                 navigate('/login')
             }, 1000)
+
         } catch (error) {
             setError(error.message)
         } finally {
@@ -371,6 +371,7 @@ export default function Register() {
                                                 className="fa-solid fa-spinner fa-spin"
                                                 aria-hidden="true"
                                             />
+
                                             Membuat akun...
                                         </>
                                     ) : (
@@ -379,6 +380,7 @@ export default function Register() {
                                                 className="fa-solid fa-user-plus"
                                                 aria-hidden="true"
                                             />
+
                                             Buat akun
                                         </>
                                     )}

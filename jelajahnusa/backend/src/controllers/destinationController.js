@@ -2,80 +2,318 @@ const pool = require('../config/database')
 const fs = require('fs')
 const path = require('path')
 
-// GET semua destinasi
+// ========================================
+// HELPER
+// ========================================
+
+const isValidId = (id) => {
+    return /^\d+$/.test(String(id)) &&
+        Number(id) > 0
+}
+
+const validateRating = (rating) => {
+    const value = Number(rating)
+
+    return (
+        Number.isFinite(value) &&
+        value >= 0 &&
+        value <= 5
+    )
+}
+
+const validatePrice = (price) => {
+    const value = Number(price)
+
+    return (
+        Number.isFinite(value) &&
+        value >= 0
+    )
+}
+
+const deleteUploadedFile = (filename) => {
+    if (!filename) {
+        return
+    }
+
+    // Hanya hapus file hasil upload
+    if (!filename.startsWith('upload-')) {
+        return
+    }
+
+    const filePath = path.join(
+        __dirname,
+        '../../uploads',
+        path.basename(filename)
+    )
+
+    if (fs.existsSync(filePath)) {
+        try {
+            fs.unlinkSync(filePath)
+        } catch (error) {
+            console.error(
+                'Gagal menghapus file:',
+                error
+            )
+        }
+    }
+}
+
+// ========================================
+// GET SEMUA DESTINASI
+// ========================================
+
 const getDestinations = async (req, res) => {
     try {
-        const [rows] = await pool.query(
-            'SELECT * FROM destinations ORDER BY created_at DESC'
-        )
+        const [rows] =
+            await pool.query(`
+                SELECT
+                    id,
+                    name,
+                    location,
+                    description,
+                    image,
+                    category,
+                    rating,
+                    price,
+                    created_at
+                FROM destinations
+                ORDER BY created_at DESC
+            `)
 
-        res.json({
+        return res.json({
             success: true,
             data: rows
         })
     } catch (error) {
-        console.error('Get destinations error:', error)
+        console.error(
+            'Get destinations error:',
+            error
+        )
 
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
-            message: 'Gagal mengambil data destinasi'
+            message:
+                'Gagal mengambil data destinasi'
         })
     }
 }
 
+// ========================================
+// CREATE DESTINATION
+// ========================================
 
-// POST tambah destinasi
 const createDestination = async (req, res) => {
     try {
-        const {
+        let {
             name,
             location,
             description,
             category,
-            rating
+            rating,
+            price
         } = req.body
 
-        if (!name || !location) {
+        // Validasi tipe data dasar
+        if (
+            typeof name !== 'string' ||
+            typeof location !== 'string'
+        ) {
+            if (req.file) {
+                deleteUploadedFile(
+                    req.file.filename
+                )
+            }
+
             return res.status(400).json({
                 success: false,
-                message: 'Nama dan lokasi wajib diisi'
+                message:
+                    'Nama dan lokasi tidak valid'
             })
         }
 
-        // Jika ada upload gambar
+        // Bersihkan input
+        name = name.trim()
+        location = location.trim()
+
+        description =
+            typeof description === 'string'
+                ? description.trim()
+                : ''
+
+        category =
+            typeof category === 'string'
+                ? category.trim()
+                : ''
+
+        // Validasi wajib
+        if (!name || !location) {
+            if (req.file) {
+                deleteUploadedFile(
+                    req.file.filename
+                )
+            }
+
+            return res.status(400).json({
+                success: false,
+                message:
+                    'Nama dan lokasi wajib diisi'
+            })
+        }
+
+        // Validasi panjang
+        if (name.length > 150) {
+            if (req.file) {
+                deleteUploadedFile(
+                    req.file.filename
+                )
+            }
+
+            return res.status(400).json({
+                success: false,
+                message:
+                    'Nama maksimal 150 karakter'
+            })
+        }
+
+        if (location.length > 200) {
+            if (req.file) {
+                deleteUploadedFile(
+                    req.file.filename
+                )
+            }
+
+            return res.status(400).json({
+                success: false,
+                message:
+                    'Lokasi maksimal 200 karakter'
+            })
+        }
+
+        if (description.length > 5000) {
+            if (req.file) {
+                deleteUploadedFile(
+                    req.file.filename
+                )
+            }
+
+            return res.status(400).json({
+                success: false,
+                message:
+                    'Deskripsi terlalu panjang'
+            })
+        }
+
+        if (category.length > 100) {
+            if (req.file) {
+                deleteUploadedFile(
+                    req.file.filename
+                )
+            }
+
+            return res.status(400).json({
+                success: false,
+                message:
+                    'Kategori maksimal 100 karakter'
+            })
+        }
+
+        // Nilai default
+        const finalRating =
+            rating === undefined ||
+                rating === ''
+                ? 0
+                : Number(rating)
+
+        const finalPrice =
+            price === undefined ||
+                price === ''
+                ? 0
+                : Number(price)
+
+        // Validasi rating
+        if (!validateRating(finalRating)) {
+            if (req.file) {
+                deleteUploadedFile(
+                    req.file.filename
+                )
+            }
+
+            return res.status(400).json({
+                success: false,
+                message:
+                    'Rating harus antara 0 sampai 5'
+            })
+        }
+
+        // Validasi harga
+        if (!validatePrice(finalPrice)) {
+            if (req.file) {
+                deleteUploadedFile(
+                    req.file.filename
+                )
+            }
+
+            return res.status(400).json({
+                success: false,
+                message:
+                    'Harga harus berupa angka dan tidak boleh negatif'
+            })
+        }
+
+        // Simpan nama file upload
         const image = req.file
             ? req.file.filename
             : ''
 
-        const [result] = await pool.query(
-            `INSERT INTO destinations
-            (
-                name,
-                location,
-                description,
-                image,
-                category,
-                rating
+        const [result] =
+            await pool.query(
+                `
+                INSERT INTO destinations
+                (
+                    name,
+                    location,
+                    description,
+                    image,
+                    category,
+                    rating,
+                    price
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                `,
+                [
+                    name,
+                    location,
+                    description,
+                    image,
+                    category,
+                    finalRating,
+                    finalPrice
+                ]
             )
-            VALUES (?, ?, ?, ?, ?, ?)`,
-            [
-                name,
-                location,
-                description || '',
-                image,
-                category || '',
-                rating || 0
-            ]
-        )
 
-        const [rows] = await pool.query(
-            'SELECT * FROM destinations WHERE id = ?',
-            [result.insertId]
-        )
+        const [rows] =
+            await pool.query(
+                `
+                SELECT
+                    id,
+                    name,
+                    location,
+                    description,
+                    image,
+                    category,
+                    rating,
+                    price,
+                    created_at
+                FROM destinations
+                WHERE id = ?
+                `,
+                [result.insertId]
+            )
 
-        res.status(201).json({
+        return res.status(201).json({
             success: true,
-            message: 'Destinasi berhasil ditambahkan',
+            message:
+                'Destinasi berhasil ditambahkan',
             data: rows[0]
         })
     } catch (error) {
@@ -84,101 +322,299 @@ const createDestination = async (req, res) => {
             error
         )
 
-        res.status(500).json({
+        if (req.file) {
+            deleteUploadedFile(
+                req.file.filename
+            )
+        }
+
+        return res.status(500).json({
             success: false,
-            message: 'Gagal menambahkan destinasi'
+            message:
+                'Gagal menambahkan destinasi'
         })
     }
 }
 
+// ========================================
+// UPDATE DESTINATION
+// ========================================
 
-// PUT edit destinasi
 const updateDestination = async (req, res) => {
     try {
         const { id } = req.params
 
-        const {
+        // Validasi ID
+        if (!isValidId(id)) {
+            if (req.file) {
+                deleteUploadedFile(
+                    req.file.filename
+                )
+            }
+
+            return res.status(400).json({
+                success: false,
+                message:
+                    'ID destinasi tidak valid'
+            })
+        }
+
+        let {
             name,
             location,
             description,
             category,
-            rating
+            rating,
+            price
         } = req.body
 
-        if (!name || !location) {
+        // Validasi tipe
+        if (
+            typeof name !== 'string' ||
+            typeof location !== 'string'
+        ) {
+            if (req.file) {
+                deleteUploadedFile(
+                    req.file.filename
+                )
+            }
+
             return res.status(400).json({
                 success: false,
-                message: 'Nama dan lokasi wajib diisi'
+                message:
+                    'Nama dan lokasi tidak valid'
+            })
+        }
+
+        name = name.trim()
+        location = location.trim()
+
+        description =
+            typeof description === 'string'
+                ? description.trim()
+                : ''
+
+        category =
+            typeof category === 'string'
+                ? category.trim()
+                : ''
+
+        // Validasi wajib
+        if (!name || !location) {
+            if (req.file) {
+                deleteUploadedFile(
+                    req.file.filename
+                )
+            }
+
+            return res.status(400).json({
+                success: false,
+                message:
+                    'Nama dan lokasi wajib diisi'
+            })
+        }
+
+        // Validasi panjang
+        if (name.length > 150) {
+            if (req.file) {
+                deleteUploadedFile(
+                    req.file.filename
+                )
+            }
+
+            return res.status(400).json({
+                success: false,
+                message:
+                    'Nama maksimal 150 karakter'
+            })
+        }
+
+        if (location.length > 200) {
+            if (req.file) {
+                deleteUploadedFile(
+                    req.file.filename
+                )
+            }
+
+            return res.status(400).json({
+                success: false,
+                message:
+                    'Lokasi maksimal 200 karakter'
+            })
+        }
+
+        if (description.length > 5000) {
+            if (req.file) {
+                deleteUploadedFile(
+                    req.file.filename
+                )
+            }
+
+            return res.status(400).json({
+                success: false,
+                message:
+                    'Deskripsi terlalu panjang'
+            })
+        }
+
+        if (category.length > 100) {
+            if (req.file) {
+                deleteUploadedFile(
+                    req.file.filename
+                )
+            }
+
+            return res.status(400).json({
+                success: false,
+                message:
+                    'Kategori maksimal 100 karakter'
             })
         }
 
         // Ambil data lama
-        const [oldRows] = await pool.query(
-            'SELECT * FROM destinations WHERE id = ?',
-            [id]
-        )
+        const [oldRows] =
+            await pool.query(
+                `
+                SELECT *
+                FROM destinations
+                WHERE id = ?
+                `,
+                [id]
+            )
 
         if (oldRows.length === 0) {
+            if (req.file) {
+                deleteUploadedFile(
+                    req.file.filename
+                )
+            }
+
             return res.status(404).json({
                 success: false,
-                message: 'Destinasi tidak ditemukan'
+                message:
+                    'Destinasi tidak ditemukan'
             })
         }
 
-        const oldImage = oldRows[0].image
+        const oldDestination =
+            oldRows[0]
 
-        // Kalau upload gambar baru → gunakan gambar baru
-        // Kalau tidak → tetap gunakan gambar lama
+        // Jika field tidak dikirim saat update,
+        // gunakan nilai lama
+        const finalRating =
+            rating === undefined ||
+                rating === ''
+                ? Number(
+                    oldDestination.rating || 0
+                )
+                : Number(rating)
+
+        const finalPrice =
+            price === undefined ||
+                price === ''
+                ? Number(
+                    oldDestination.price || 0
+                )
+                : Number(price)
+
+        // Validasi rating
+        if (!validateRating(finalRating)) {
+            if (req.file) {
+                deleteUploadedFile(
+                    req.file.filename
+                )
+            }
+
+            return res.status(400).json({
+                success: false,
+                message:
+                    'Rating harus antara 0 sampai 5'
+            })
+        }
+
+        // Validasi harga
+        if (!validatePrice(finalPrice)) {
+            if (req.file) {
+                deleteUploadedFile(
+                    req.file.filename
+                )
+            }
+
+            return res.status(400).json({
+                success: false,
+                message:
+                    'Harga harus berupa angka dan tidak boleh negatif'
+            })
+        }
+
+        const oldImage =
+            oldDestination.image || ''
+
         const image = req.file
             ? req.file.filename
             : oldImage
 
-        const [result] = await pool.query(
-            `UPDATE destinations
+        // Update database
+        await pool.query(
+            `
+            UPDATE destinations
             SET
                 name = ?,
                 location = ?,
                 description = ?,
                 image = ?,
                 category = ?,
-                rating = ?
-            WHERE id = ?`,
+                rating = ?,
+                price = ?
+            WHERE id = ?
+            `,
             [
                 name,
                 location,
-                description || '',
+                description,
                 image,
-                category || '',
-                rating || 0,
+                category,
+                finalRating,
+                finalPrice,
                 id
             ]
         )
 
-        // Hapus file gambar lama jika diganti
+        // Hapus gambar lama hanya jika
+        // benar-benar diganti dengan upload baru
         if (
             req.file &&
             oldImage &&
             oldImage !== image
         ) {
-            const oldFile = path.join(
-                __dirname,
-                '../../uploads',
+            deleteUploadedFile(
                 oldImage
             )
-
-            if (fs.existsSync(oldFile)) {
-                fs.unlinkSync(oldFile)
-            }
         }
 
-        const [rows] = await pool.query(
-            'SELECT * FROM destinations WHERE id = ?',
-            [id]
-        )
+        const [rows] =
+            await pool.query(
+                `
+                SELECT
+                    id,
+                    name,
+                    location,
+                    description,
+                    image,
+                    category,
+                    rating,
+                    price,
+                    created_at
+                FROM destinations
+                WHERE id = ?
+                `,
+                [id]
+            )
 
-        res.json({
+        return res.json({
             success: true,
-            message: 'Destinasi berhasil diperbarui',
+            message:
+                'Destinasi berhasil diperbarui',
             data: rows[0]
         })
     } catch (error) {
@@ -187,55 +623,88 @@ const updateDestination = async (req, res) => {
             error
         )
 
-        res.status(500).json({
+        if (req.file) {
+            deleteUploadedFile(
+                req.file.filename
+            )
+        }
+
+        return res.status(500).json({
             success: false,
-            message: 'Gagal memperbarui destinasi'
+            message:
+                'Gagal memperbarui destinasi'
         })
     }
 }
 
+// ========================================
+// DELETE DESTINATION
+// ========================================
 
-// DELETE hapus destinasi
 const deleteDestination = async (req, res) => {
     try {
         const { id } = req.params
 
+        // Validasi ID
+        if (!isValidId(id)) {
+            return res.status(400).json({
+                success: false,
+                message:
+                    'ID destinasi tidak valid'
+            })
+        }
+
         // Ambil data sebelum dihapus
-        const [rows] = await pool.query(
-            'SELECT image FROM destinations WHERE id = ?',
-            [id]
-        )
+        const [rows] =
+            await pool.query(
+                `
+                SELECT image
+                FROM destinations
+                WHERE id = ?
+                `,
+                [id]
+            )
 
         if (rows.length === 0) {
             return res.status(404).json({
                 success: false,
-                message: 'Destinasi tidak ditemukan'
+                message:
+                    'Destinasi tidak ditemukan'
             })
         }
 
-        const image = rows[0].image
+        const image =
+            rows[0].image || ''
 
-        const [result] = await pool.query(
-            'DELETE FROM destinations WHERE id = ?',
-            [id]
-        )
-
-        // Hapus file gambar dari uploads
-        if (image) {
-            const imagePath = path.join(
-                __dirname,
-                '../../uploads',
-                image
+        // Hapus database
+        const [result] =
+            await pool.query(
+                `
+                DELETE FROM destinations
+                WHERE id = ?
+                `,
+                [id]
             )
 
-            if (fs.existsSync(imagePath)) {
-                fs.unlinkSync(imagePath)
-            }
+        if (result.affectedRows === 0) {
+            return res.status(404).json({
+                success: false,
+                message:
+                    'Destinasi tidak ditemukan'
+            })
         }
 
-        res.json({
+        // Hapus file upload
+        if (image) {
+            deleteUploadedFile(
+                image
+            )
+        }
+
+        return res.json({
             success: true,
-            message: 'Destinasi berhasil dihapus'
+            message:
+                'Destinasi berhasil dihapus'
         })
     } catch (error) {
         console.error(
@@ -243,13 +712,17 @@ const deleteDestination = async (req, res) => {
             error
         )
 
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
-            message: 'Gagal menghapus destinasi'
+            message:
+                'Gagal menghapus destinasi'
         })
     }
 }
 
+// ========================================
+// EXPORT
+// ========================================
 
 module.exports = {
     getDestinations,

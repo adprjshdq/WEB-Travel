@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
-
-const API_URL = 'http://localhost:5001/api'
+import API_URL from '../services/api'
 
 export default function AdminBooking() {
     const [bookings, setBookings] = useState([])
@@ -30,7 +29,7 @@ export default function AdminBooking() {
                 await response.json()
 
             if (result.success) {
-                setBookings(result.data)
+                setBookings(result.data || [])
             } else {
                 alert(
                     result.message ||
@@ -66,15 +65,12 @@ export default function AdminBooking() {
                 `${API_URL}/bookings/${id}/status`,
                 {
                     method: 'PUT',
-
                     headers: {
                         'Content-Type':
                             'application/json',
-
                         Authorization:
                             `Bearer ${token}`
                     },
-
                     body: JSON.stringify({
                         status
                     })
@@ -89,7 +85,6 @@ export default function AdminBooking() {
                     result.message ||
                     'Gagal mengubah status booking.'
                 )
-
                 return
             }
 
@@ -122,7 +117,6 @@ export default function AdminBooking() {
                 `${API_URL}/bookings/${id}`,
                 {
                     method: 'DELETE',
-
                     headers: {
                         Authorization:
                             `Bearer ${token}`
@@ -138,7 +132,6 @@ export default function AdminBooking() {
                     result.message ||
                     'Gagal menghapus booking.'
                 )
-
                 return
             }
 
@@ -197,10 +190,14 @@ export default function AdminBooking() {
         if (
             currentCurrency === 'USD'
         ) {
-            return `USD ${amount.toLocaleString('en-US')}`
+            return `USD ${amount.toLocaleString(
+                'en-US'
+            )}`
         }
 
-        return `Rp ${amount.toLocaleString('id-ID')}`
+        return `Rp ${amount.toLocaleString(
+            'id-ID'
+        )}`
     }
 
     const getStatusClass = (status) => {
@@ -285,7 +282,6 @@ export default function AdminBooking() {
         <div className="space-y-6">
 
             {/* HEADER */}
-
             <div>
                 <p className="text-mute text-sm">
                     Administrator
@@ -301,105 +297,87 @@ export default function AdminBooking() {
                 </p>
             </div>
 
-
             {/* STATISTIK */}
-
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
 
                 <div className="card p-4">
                     <div className="flex items-center justify-between">
-
                         <div>
                             <p className="text-mute text-sm">
                                 Total Booking
                             </p>
 
-                            <p className="text-2xl font-bold mt-1">
+                            <p className="mt-1 text-2xl font-bold">
                                 {totalBooking}
                             </p>
                         </div>
 
-                        <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10">
                             <i className="fa-solid fa-calendar text-blue-400" />
                         </div>
-
                     </div>
                 </div>
 
-
                 <div className="card p-4">
                     <div className="flex items-center justify-between">
-
                         <div>
                             <p className="text-mute text-sm">
                                 Pending
                             </p>
 
-                            <p className="text-2xl font-bold mt-1">
+                            <p className="mt-1 text-2xl font-bold">
                                 {pendingBooking}
                             </p>
                         </div>
 
-                        <div className="w-10 h-10 rounded-xl bg-yellow-500/10 flex items-center justify-center">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-yellow-500/10">
                             <i className="fa-solid fa-clock text-yellow-400" />
                         </div>
-
                     </div>
                 </div>
 
-
                 <div className="card p-4">
                     <div className="flex items-center justify-between">
-
                         <div>
                             <p className="text-mute text-sm">
                                 Confirmed
                             </p>
 
-                            <p className="text-2xl font-bold mt-1">
+                            <p className="mt-1 text-2xl font-bold">
                                 {confirmedBooking}
                             </p>
                         </div>
 
-                        <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-500/10">
                             <i className="fa-solid fa-circle-check text-green-400" />
                         </div>
-
                     </div>
                 </div>
 
-
                 <div className="card p-4">
                     <div className="flex items-center justify-between">
-
                         <div>
                             <p className="text-mute text-sm">
                                 Cancelled
                             </p>
 
-                            <p className="text-2xl font-bold mt-1">
+                            <p className="mt-1 text-2xl font-bold">
                                 {cancelledBooking}
                             </p>
                         </div>
 
-                        <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-500/10">
                             <i className="fa-solid fa-circle-xmark text-red-400" />
                         </div>
-
                     </div>
                 </div>
-
             </div>
 
-
             {/* FILTER */}
-
             <section className="card p-4">
+                <div className="flex flex-col gap-3 lg:flex-row">
 
-                <div className="flex flex-col lg:flex-row gap-3">
-
-                    <div className="flex-1 relative">
-
+                    <div className="relative flex-1">
                         <i className="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-mute" />
 
                         <input
@@ -413,7 +391,6 @@ export default function AdminBooking() {
                                 )
                             }
                         />
-
                     </div>
 
                     <select
@@ -441,34 +418,26 @@ export default function AdminBooking() {
                             Cancelled
                         </option>
                     </select>
-
                 </div>
 
-
-                <div className="flex items-center justify-between mt-3 text-sm">
-
+                <div className="mt-3 flex items-center justify-between text-sm">
                     <p className="text-mute">
                         Menampilkan{' '}
-
-                        <span className="text-ink font-semibold">
+                        <span className="font-semibold text-ink">
                             {filteredBookings.length}
                         </span>{' '}
-
                         dari{' '}
-
-                        <span className="text-ink font-semibold">
+                        <span className="font-semibold text-ink">
                             {bookings.length}
                         </span>{' '}
-
                         booking
                     </p>
 
                     {(search ||
                         statusFilter !== 'all') && (
-
                             <button
                                 type="button"
-                                className="text-accent text-sm font-semibold"
+                                className="text-sm font-semibold text-accent"
                                 onClick={() => {
                                     setSearch('')
                                     setStatusFilter(
@@ -478,34 +447,22 @@ export default function AdminBooking() {
                             >
                                 Reset filter
                             </button>
-
                         )}
-
                 </div>
-
             </section>
 
-
             {/* DATA */}
-
             <section className="card p-4">
-
                 {loading ? (
-
                     <div className="py-10 text-center">
-
                         <i className="fa-solid fa-spinner fa-spin text-2xl text-mute" />
 
-                        <p className="text-mute mt-3">
+                        <p className="mt-3 text-mute">
                             Memuat booking...
                         </p>
-
                     </div>
-
                 ) : filteredBookings.length === 0 ? (
-
-                    <div className="text-center py-12">
-
+                    <div className="py-12 text-center">
                         <i className="fa-solid fa-calendar-xmark text-4xl text-mute" />
 
                         <p className="mt-4 font-semibold">
@@ -514,98 +471,75 @@ export default function AdminBooking() {
                                 : 'Booking tidak ditemukan'}
                         </p>
 
-                        <p className="text-mute text-sm mt-1">
+                        <p className="mt-1 text-sm text-mute">
                             {bookings.length === 0
                                 ? 'Booking dari pengguna akan muncul di sini.'
                                 : 'Coba ubah kata kunci atau filter status.'}
                         </p>
-
                     </div>
-
                 ) : (
-
                     <div className="overflow-x-auto">
-
                         <table className="w-full text-sm">
-
                             <thead>
-
                                 <tr className="border-b border-line text-left">
-
-                                    <th className="p-3 whitespace-nowrap">
+                                    <th className="whitespace-nowrap p-3">
                                         User
                                     </th>
 
-                                    <th className="p-3 whitespace-nowrap">
+                                    <th className="whitespace-nowrap p-3">
                                         Destinasi
                                     </th>
 
-                                    <th className="p-3 whitespace-nowrap">
+                                    <th className="whitespace-nowrap p-3">
                                         Tanggal
                                     </th>
 
-                                    <th className="p-3 whitespace-nowrap">
+                                    <th className="whitespace-nowrap p-3">
                                         Tamu
                                     </th>
 
-                                    <th className="p-3 whitespace-nowrap">
+                                    <th className="whitespace-nowrap p-3">
                                         Total
                                     </th>
 
-                                    <th className="p-3 whitespace-nowrap">
+                                    <th className="whitespace-nowrap p-3">
                                         Status
                                     </th>
 
-                                    <th className="p-3 text-right whitespace-nowrap">
+                                    <th className="whitespace-nowrap p-3 text-right">
                                         Aksi
                                     </th>
-
                                 </tr>
-
                             </thead>
 
                             <tbody>
-
                                 {filteredBookings.map(
                                     (booking) => (
-
                                         <tr
                                             key={booking.id}
                                             className="border-b border-line last:border-0 hover:bg-white/[0.02]"
                                         >
-
                                             {/* USER */}
-
-                                            <td className="p-3 min-w-48">
-
+                                            <td className="min-w-48 p-3">
                                                 <p className="font-semibold">
                                                     {booking.user_name}
                                                 </p>
 
-                                                <p className="text-mute text-xs mt-1">
+                                                <p className="mt-1 text-xs text-mute">
                                                     {booking.user_email}
                                                 </p>
-
                                             </td>
 
-
                                             {/* DESTINATION */}
-
-                                            <td className="p-3 min-w-40">
-
+                                            <td className="min-w-40 p-3">
                                                 <p className="font-medium">
                                                     {booking.destination_name}
                                                 </p>
-
                                             </td>
 
-
                                             {/* DATE */}
-
-                                            <td className="p-3 whitespace-nowrap">
-
+                                            <td className="whitespace-nowrap p-3">
                                                 <div className="flex items-center gap-2">
-
                                                     <i className="fa-regular fa-calendar text-mute" />
 
                                                     <span>
@@ -613,54 +547,36 @@ export default function AdminBooking() {
                                                             booking.booking_date
                                                         )}
                                                     </span>
-
                                                 </div>
-
                                             </td>
 
-
                                             {/* GUEST */}
-
-                                            <td className="p-3 whitespace-nowrap">
-
+                                            <td className="whitespace-nowrap p-3">
                                                 <div className="flex items-center gap-2">
-
                                                     <i className="fa-solid fa-users text-mute" />
 
                                                     <span>
                                                         {booking.guests}{' '}
                                                         orang
                                                     </span>
-
                                                 </div>
-
                                             </td>
 
-
                                             {/* PRICE */}
-
-                                            <td className="p-3 whitespace-nowrap">
-
+                                            <td className="whitespace-nowrap p-3">
                                                 <span className="font-bold text-accent">
-
                                                     {formatPrice(
                                                         booking.total_price,
                                                         booking.currency
                                                     )}
-
                                                 </span>
-
                                             </td>
 
-
                                             {/* STATUS */}
-
                                             <td className="p-3">
-
                                                 <div className="space-y-2">
-
                                                     <span
-                                                        className={`inline-flex items-center px-2.5 py-1 rounded-full border text-xs font-semibold ${getStatusClass(
+                                                        className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold ${getStatusClass(
                                                             booking.status
                                                         )}`}
                                                     >
@@ -685,7 +601,6 @@ export default function AdminBooking() {
                                                             )
                                                         }
                                                     >
-
                                                         <option value="pending">
                                                             Pending
                                                         </option>
@@ -697,18 +612,12 @@ export default function AdminBooking() {
                                                         <option value="cancelled">
                                                             Cancelled
                                                         </option>
-
                                                     </select>
-
                                                 </div>
-
                                             </td>
 
-
                                             {/* ACTION */}
-
                                             <td className="p-3 text-right">
-
                                                 <button
                                                     type="button"
                                                     className="btn"
@@ -721,24 +630,15 @@ export default function AdminBooking() {
                                                 >
                                                     <i className="fa-solid fa-trash" />
                                                 </button>
-
                                             </td>
-
                                         </tr>
-
                                     )
                                 )}
-
                             </tbody>
-
                         </table>
-
                     </div>
-
                 )}
-
             </section>
-
         </div>
     )
 }

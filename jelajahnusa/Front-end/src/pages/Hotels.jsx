@@ -15,7 +15,7 @@ import {
 
 import { getImageUrl } from '../utils/imageUrl'
 
-const API_URL = 'http://localhost:5001/api'
+import API_URL from '../services/api'
 
 export default function Hotels() {
   const [params, setParams] = useSearchParams()

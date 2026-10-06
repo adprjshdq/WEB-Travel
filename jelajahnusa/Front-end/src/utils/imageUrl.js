@@ -1,4 +1,7 @@
-const SERVER_URL = 'http://localhost:5001'
+import API_URL from '../services/api'
+
+const SERVER_URL =
+    API_URL.replace(/\/api\/?$/, '')
 
 export const getImageUrl = (image) => {
     if (!image) {

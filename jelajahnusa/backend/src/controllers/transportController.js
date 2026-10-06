@@ -1,5 +1,9 @@
 const pool = require('../config/database')
 
+// ========================================
+// GET SEMUA TRANSPORTASI
+// ========================================
+
 const getTransports = async (req, res) => {
     try {
         const [rows] = await pool.query(`
@@ -15,7 +19,7 @@ const getTransports = async (req, res) => {
             ORDER BY id ASC
         `)
 
-        res.json({
+        return res.json({
             success: true,
             data: rows
         })
@@ -25,13 +29,17 @@ const getTransports = async (req, res) => {
             error
         )
 
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             message:
                 'Gagal mengambil data transportasi'
         })
     }
 }
+
+// ========================================
+// EXPORT
+// ========================================
 
 module.exports = {
     getTransports
