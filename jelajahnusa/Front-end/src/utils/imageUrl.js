@@ -1,23 +1,17 @@
-import API_URL from '../services/api'
+export function getImageUrl(image) {
+  if (!image) return '';
 
-const SERVER_URL =
-    API_URL.replace(/\/api\/?$/, '')
+  if (image === 'upload-1791292990010-rinjani.jpg') {
+    return '/images/rinjani.jpg';
+  }
 
-export const getImageUrl = (image) => {
-    if (!image) {
-        return '/images/Labuan bajo copy.jpg'
-    }
+  if (image.startsWith('http')) {
+    return image;
+  }
 
-    if (
-        image.startsWith('http://') ||
-        image.startsWith('https://')
-    ) {
-        return image
-    }
+  if (image.startsWith('upload-')) {
+    return `${import.meta.env.VITE_API_URL?.replace('/api', '')}/uploads/${image}`;
+  }
 
-    if (image.startsWith('upload-')) {
-        return `${SERVER_URL}/uploads/${image}`
-    }
-
-    return `/images/${image}`
+  return `/images/${image}`;
 }
