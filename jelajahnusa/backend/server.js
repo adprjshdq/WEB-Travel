@@ -285,15 +285,13 @@ app.get(
                 data: rows
             })
         } catch (error) {
-            console.error(
-                'Get places error:',
-                error
-            )
+            console.error('ERROR /api/places:', error);
 
             res.status(500).json({
                 success: false,
-                message: 'Gagal mengambil data tempat'
-            })
+                message: 'Gagal mengambil data tempat',
+                error: error.message
+            });
         }
     }
 )
