@@ -3,7 +3,7 @@ const cors = require('cors')
 const dotenv = require('dotenv')
 const path = require('path')
 
-dotenv.config
+dotenv.config()
 
 const pool = require('./src/config/database')
 
@@ -39,19 +39,16 @@ const allowedOrigins = (
     'http://localhost:5173'
 )
     .split(',')
-    .map((origin) => origin.trim())
+    .map(origin => origin.trim())
     .filter(Boolean)
 
 // ========================================
 // MIDDLEWARE
 // ========================================
 
-// CORS
 app.use(
     cors({
         origin: (origin, callback) => {
-            // Izinkan request tanpa Origin
-            // seperti Postman atau server-to-server
             if (!origin) {
                 return callback(null, true)
             }
@@ -64,6 +61,7 @@ app.use(
                 new Error('Origin tidak diizinkan oleh CORS')
             )
         },
+
         methods: [
             'GET',
             'POST',
@@ -71,22 +69,22 @@ app.use(
             'DELETE',
             'OPTIONS'
         ],
+
         allowedHeaders: [
             'Content-Type',
             'Authorization'
         ],
+
         optionsSuccessStatus: 204
     })
 )
 
-// JSON body
 app.use(
     express.json({
         limit: '1mb'
     })
 )
 
-// URL encoded body
 app.use(
     express.urlencoded({
         extended: true,
@@ -170,8 +168,7 @@ app.get(
     (req, res) => {
         res.json({
             success: true,
-            message:
-                'API JelajahNusa berhasil berjalan!'
+            message: 'API JelajahNusa berhasil berjalan!'
         })
     }
 )
@@ -187,8 +184,7 @@ app.get(
     (req, res) => {
         res.json({
             success: true,
-            message:
-                'Halo Admin! Akses berhasil.',
+            message: 'Halo Admin! Akses berhasil.',
             user: req.user
         })
     }
@@ -198,50 +194,53 @@ app.get(
 // DATABASE TEST
 // ========================================
 
-app.get('/api/health', async (req, res) => {
-    try {
-        await pool.query('SELECT 1')
+app.get(
+    '/api/health',
+    async (req, res) => {
+        try {
+            await pool.query('SELECT 1')
 
-        return res.json({
-            success: true,
-            message: 'API dan database berjalan normal'
-        })
-    } catch (error) {
-        console.error(
-            'Health check error:',
-            error
-        )
+            return res.json({
+                success: true,
+                message: 'API dan database berjalan normal'
+            })
+        } catch (error) {
+            console.error(
+                'Health check error:',
+                error
+            )
 
-        return res.status(503).json({
-            success: false,
-            message: 'Database tidak tersedia'
-        })
+            return res.status(503).json({
+                success: false,
+                message: 'Database tidak tersedia'
+            })
+        }
     }
-})
+)
 
 // ========================================
 // PUBLIC DESTINATIONS
 // ========================================
 
+// /api/destinations
 app.get(
     '/api/destinations',
     async (req, res) => {
         try {
-            const [rows] =
-                await pool.query(`
-                    SELECT
-                        id,
-                        name,
-                        location,
-                        description,
-                        image,
-                        category,
-                        rating,
-                        price,
-                        created_at
-                    FROM destinations
-                    ORDER BY id ASC
-                `)
+            const [rows] = await pool.query(`
+                SELECT
+                    id,
+                    name,
+                    location,
+                    description,
+                    image,
+                    category,
+                    rating,
+                    price,
+                    created_at
+                FROM destinations
+                ORDER BY id ASC
+            `)
 
             res.json({
                 success: true,
@@ -255,8 +254,45 @@ app.get(
 
             res.status(500).json({
                 success: false,
-                message:
-                    'Gagal mengambil data destinasi'
+                message: 'Gagal mengambil data destinasi'
+            })
+        }
+    }
+)
+
+// /api/places
+app.get(
+    '/api/places',
+    async (req, res) => {
+        try {
+            const [rows] = await pool.query(`
+                SELECT
+                    id,
+                    name,
+                    location,
+                    description,
+                    image,
+                    category,
+                    rating,
+                    price,
+                    created_at
+                FROM destinations
+                ORDER BY id ASC
+            `)
+
+            res.json({
+                success: true,
+                data: rows
+            })
+        } catch (error) {
+            console.error(
+                'Get places error:',
+                error
+            )
+
+            res.status(500).json({
+                success: false,
+                message: 'Gagal mengambil data tempat'
             })
         }
     }
@@ -272,40 +308,35 @@ app.get(
     isAdmin,
     async (req, res) => {
         try {
-            const [users] =
-                await pool.query(`
-                    SELECT COUNT(*) AS total
-                    FROM users
-                `)
+            const [users] = await pool.query(`
+                SELECT COUNT(*) AS total
+                FROM users
+            `)
 
-            const [destinations] =
-                await pool.query(`
-                    SELECT COUNT(*) AS total
-                    FROM destinations
-                `)
+            const [destinations] = await pool.query(`
+                SELECT COUNT(*) AS total
+                FROM destinations
+            `)
 
-            const [bookings] =
-                await pool.query(`
-                    SELECT COUNT(*) AS total
-                    FROM bookings
-                `)
+            const [bookings] = await pool.query(`
+                SELECT COUNT(*) AS total
+                FROM bookings
+            `)
 
-            const [revenue] =
-                await pool.query(`
-                    SELECT
-                        COALESCE(
-                            SUM(total_price),
-                            0
-                        ) AS total
-                    FROM bookings
-                    WHERE status = 'confirmed'
-                `)
+            const [revenue] = await pool.query(`
+                SELECT
+                    COALESCE(
+                        SUM(total_price),
+                        0
+                    ) AS total
+                FROM bookings
+                WHERE status = 'confirmed'
+            `)
 
             res.json({
                 success: true,
                 data: {
-                    totalUsers:
-                        Number(users[0].total),
+                    totalUsers: Number(users[0].total),
 
                     totalDestinations:
                         Number(
@@ -331,8 +362,7 @@ app.get(
 
             res.status(500).json({
                 success: false,
-                message:
-                    'Gagal mengambil statistik admin'
+                message: 'Gagal mengambil statistik admin'
             })
         }
     }
