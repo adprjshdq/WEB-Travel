@@ -34,6 +34,14 @@ export default function AdminDestinations() {
             return ''
         }
 
+        // Rinjani menggunakan gambar dari frontend/public/images
+        if (
+            image === 'upload-1791292990010-rinjani.jpg'
+        ) {
+            return '/images/rinjani.jpg'
+        }
+
+        // Jika image sudah berupa URL lengkap
         if (
             image.startsWith('http://') ||
             image.startsWith('https://')
@@ -41,10 +49,12 @@ export default function AdminDestinations() {
             return image
         }
 
+        // Gambar hasil upload ke backend
         if (image.startsWith('upload-')) {
             return `${SERVER_URL}/uploads/${image}`
         }
 
+        // Gambar dari frontend/public/images
         return `/images/${image}`
     }
 
@@ -128,7 +138,6 @@ export default function AdminDestinations() {
             )
 
             e.target.value = ''
-
             return
         }
 
@@ -138,7 +147,6 @@ export default function AdminDestinations() {
             )
 
             e.target.value = ''
-
             return
         }
 
@@ -149,8 +157,7 @@ export default function AdminDestinations() {
 
         setMessage('')
 
-        const imageUrl =
-            URL.createObjectURL(file)
+        const imageUrl = URL.createObjectURL(file)
 
         setPreview(imageUrl)
     }
@@ -374,9 +381,11 @@ export default function AdminDestinations() {
                     destination.name
                         ?.toLowerCase()
                         .includes(keyword) ||
+
                     destination.location
                         ?.toLowerCase()
                         .includes(keyword) ||
+
                     destination.category
                         ?.toLowerCase()
                         .includes(keyword)
@@ -415,8 +424,8 @@ export default function AdminDestinations() {
 
                             <i
                                 className={`fa-solid ${editingId
-                                        ? 'fa-pen-to-square'
-                                        : 'fa-location-dot'
+                                    ? 'fa-pen-to-square'
+                                    : 'fa-location-dot'
                                     } text-accent`}
                             />
 
@@ -589,16 +598,17 @@ export default function AdminDestinations() {
                                     src={preview}
                                     alt="Preview destinasi"
                                     className="w-full h-56 object-cover"
+                                    onError={(e) => {
+                                        e.currentTarget.style.display = 'none'
+                                    }}
                                 />
 
                                 <div className="absolute bottom-0 left-0 right-0 bg-black/60 px-3 py-2">
 
                                     <p className="text-xs text-white">
-
                                         {form.image
                                             ? form.image.name
                                             : 'Gambar saat ini'}
-
                                     </p>
 
                                 </div>
@@ -639,10 +649,10 @@ export default function AdminDestinations() {
 
                             <i
                                 className={`fa-solid ${saving
-                                        ? 'fa-spinner fa-spin'
-                                        : editingId
-                                            ? 'fa-save'
-                                            : 'fa-cloud-arrow-up'
+                                    ? 'fa-spinner fa-spin'
+                                    : editingId
+                                        ? 'fa-save'
+                                        : 'fa-cloud-arrow-up'
                                     }`}
                             />
 
@@ -748,6 +758,7 @@ export default function AdminDestinations() {
 
                 {!loading &&
                     filteredDestinations.length === 0 && (
+
                         <div className="py-10 text-center">
 
                             <div className="w-14 h-14 rounded-full bg-line flex items-center justify-center mx-auto">
@@ -775,10 +786,12 @@ export default function AdminDestinations() {
 
                 {!loading &&
                     filteredDestinations.length > 0 && (
+
                         <div className="grid lg:grid-cols-2 gap-4 mt-5">
 
                             {filteredDestinations.map(
                                 (destination) => (
+
                                     <article
                                         key={destination.id}
                                         className="border border-line rounded-xl overflow-hidden hover:border-accent transition"
@@ -789,6 +802,7 @@ export default function AdminDestinations() {
                                         <div className="relative h-48">
 
                                             {destination.image ? (
+
                                                 <img
                                                     src={getImageUrl(
                                                         destination.image
@@ -797,31 +811,43 @@ export default function AdminDestinations() {
                                                         destination.name
                                                     }
                                                     className="w-full h-full object-cover"
+                                                    onError={(e) => {
+                                                        e.currentTarget.style.display = 'none'
+                                                    }}
                                                 />
+
                                             ) : (
+
                                                 <div className="w-full h-full bg-line flex items-center justify-center">
 
                                                     <i className="fa-solid fa-image text-mute text-2xl" />
 
                                                 </div>
+
                                             )}
 
                                             {/* CATEGORY */}
 
                                             {destination.category && (
+
                                                 <span className="absolute top-3 left-3 px-3 py-1 rounded-full bg-black/70 text-white text-xs font-semibold">
+
                                                     {
                                                         destination.category
                                                     }
+
                                                 </span>
                                             )}
 
                                             {/* RATING */}
 
                                             <span className="absolute top-3 right-3 px-3 py-1 rounded-full bg-black/70 text-white text-xs font-semibold">
+
                                                 ⭐{' '}
+
                                                 {destination.rating ||
                                                     '0.0'}
+
                                             </span>
 
                                         </div>
@@ -835,9 +861,11 @@ export default function AdminDestinations() {
                                                 <div className="min-w-0">
 
                                                     <h3 className="font-bold text-lg">
+
                                                         {
                                                             destination.name
                                                         }
+
                                                     </h3>
 
                                                     <p className="text-mute text-sm mt-1">
@@ -857,10 +885,13 @@ export default function AdminDestinations() {
                                             {/* DESCRIPTION */}
 
                                             {destination.description && (
+
                                                 <p className="text-mute text-sm mt-3 line-clamp-2">
+
                                                     {
                                                         destination.description
                                                     }
+
                                                 </p>
                                             )}
 
@@ -877,8 +908,11 @@ export default function AdminDestinations() {
                                                     }
                                                     className="btn flex-1"
                                                 >
+
                                                     <i className="fa-solid fa-pen" />
+
                                                     Edit
+
                                                 </button>
 
                                                 <button
@@ -890,8 +924,11 @@ export default function AdminDestinations() {
                                                     }
                                                     className="btn flex-1"
                                                 >
+
                                                     <i className="fa-solid fa-trash" />
+
                                                     Hapus
+
                                                 </button>
 
                                             </div>
