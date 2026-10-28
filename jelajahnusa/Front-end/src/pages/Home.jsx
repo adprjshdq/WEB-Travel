@@ -88,13 +88,9 @@ export default function Home() {
           }}
         />
 
-        {/* Dark overlay */}
+        {/* Overlay */}
 
-        <div className="
-                    absolute
-                    inset-0
-                    bg-[#0b1220]/75
-                " />
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/70 to-slate-950/40" />
 
         <div className="
                     relative
@@ -113,7 +109,7 @@ export default function Home() {
                             mb-3
                             text-sm
                             font-semibold
-                            text-accent
+                            text-emerald-400
                         ">
               Jelajah Indonesia
             </p>
@@ -125,6 +121,8 @@ export default function Home() {
                                 text-3xl
                                 font-bold
                                 leading-tight
+                                text-white
+                                drop-shadow-[0_10px_60px_rgba(2,6,23,0.9)]
                                 sm:text-4xl
                                 lg:text-5xl
                             "
@@ -138,7 +136,7 @@ export default function Home() {
                             max-w-xl
                             text-base
                             leading-relaxed
-                            text-mute
+                            text-slate-200
                             sm:text-lg
                         ">
               Cari destinasi, penginapan,
@@ -183,7 +181,7 @@ export default function Home() {
                                             left-4
                                             top-1/2
                                             -translate-y-1/2
-                                            text-mute
+                                            text-slate-400
                                         "
                     aria-hidden="true"
                   />
@@ -196,14 +194,18 @@ export default function Home() {
                                             w-full
                                             rounded-md
                                             border
-                                            border-line
-                                            bg-bg/90
+                                            border-slate-200
+                                            bg-white/95
                                             pl-11
                                             pr-4
-                                            text-ink
+                                            text-slate-900
+                                            shadow-lg
+                                            shadow-slate-950/10
                                             outline-none
-                                            placeholder:text-mute
-                                            focus:border-accent
+                                            placeholder:text-slate-400
+                                            focus:border-emerald-500
+                                            focus:ring-2
+                                            focus:ring-emerald-500/10
                                         "
                     placeholder="Cari destinasi..."
                   />
@@ -236,7 +238,7 @@ export default function Home() {
                         ">
               <span className="
                                 text-xs
-                                text-mute
+                                text-slate-300
                             ">
                 Populer:
               </span>
@@ -259,10 +261,10 @@ export default function Home() {
                   }
                   className="
                                         text-xs
-                                        text-mute
+                                        text-slate-200
                                         underline
                                         underline-offset-4
-                                        hover:text-accent
+                                        hover:text-emerald-300
                                         transition
                                     "
                 >

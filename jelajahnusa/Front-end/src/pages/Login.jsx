@@ -87,7 +87,7 @@ export default function Login() {
                 <div className="w-full max-w-[430px]">
 
                     {/* Card */}
-                    <div className="rounded-2xl border border-white/10 bg-slate-950/80 backdrop-blur-xl shadow-2xl overflow-hidden">
+                    <div className="rounded-2xl border border-slate-200 bg-white shadow-xl overflow-hidden">
 
                         {/* Top accent */}
                         <div className="h-1 bg-gradient-to-r from-emerald-400 via-green-500 to-cyan-400" />
@@ -97,11 +97,11 @@ export default function Login() {
                             {/* Brand */}
                             <Link
                                 to="/"
-                                className="inline-flex items-center gap-2 text-lg font-extrabold text-white hover:opacity-90 transition"
+                                className="inline-flex items-center gap-2 text-lg font-extrabold text-slate-900 hover:opacity-90 transition"
                             >
-                                <span className="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-400/20 flex items-center justify-center">
+                                <span className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center">
                                     <i
-                                        className="fa-solid fa-compass text-emerald-400"
+                                        className="fa-solid fa-compass text-emerald-600"
                                         aria-hidden="true"
                                     />
                                 </span>
@@ -111,15 +111,15 @@ export default function Login() {
 
                             {/* Heading */}
                             <div className="mt-8">
-                                <p className="text-emerald-400 text-sm font-semibold mb-2">
+                                <p className="text-emerald-600 text-sm font-semibold mb-2">
                                     Selamat datang kembali
                                 </p>
 
-                                <h1 className="text-2xl sm:text-3xl font-extrabold text-white">
+                                <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
                                     Masuk ke akunmu
                                 </h1>
 
-                                <p className="text-slate-400 text-sm mt-2 leading-relaxed">
+                                <p className="text-slate-600 text-sm mt-2 leading-relaxed">
                                     Masuk untuk melanjutkan perjalanan
                                     dan menemukan destinasi favoritmu.
                                 </p>
@@ -135,20 +135,20 @@ export default function Login() {
                                 <div>
                                     <label
                                         htmlFor="email"
-                                        className="block text-sm font-semibold text-slate-300 mb-2"
+                                        className="block text-sm font-semibold text-slate-700 mb-2"
                                     >
                                         Email
                                     </label>
 
                                     <div className="relative">
                                         <i
-                                            className="fa-solid fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"
+                                            className="fa-solid fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
                                             aria-hidden="true"
                                         />
 
                                         <input
                                             id="email"
-                                            className="w-full h-12 rounded-xl border border-slate-700 bg-slate-900/80 text-white pl-11 pr-4 outline-none transition placeholder:text-slate-600 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20"
+                                            className="w-full h-12 rounded-xl border border-slate-200 bg-white text-slate-900 pl-11 pr-4 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10"
                                             type="email"
                                             placeholder="nama@email.com"
                                             value={email}
@@ -166,7 +166,7 @@ export default function Login() {
                                     <div className="flex items-center justify-between mb-2">
                                         <label
                                             htmlFor="password"
-                                            className="block text-sm font-semibold text-slate-300"
+                                            className="block text-sm font-semibold text-slate-700"
                                         >
                                             Password
                                         </label>
@@ -174,13 +174,13 @@ export default function Login() {
 
                                     <div className="relative">
                                         <i
-                                            className="fa-solid fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"
+                                            className="fa-solid fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
                                             aria-hidden="true"
                                         />
 
                                         <input
                                             id="password"
-                                            className="w-full h-12 rounded-xl border border-slate-700 bg-slate-900/80 text-white pl-11 pr-12 outline-none transition placeholder:text-slate-600 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20"
+                                            className="w-full h-12 rounded-xl border border-slate-200 bg-white text-slate-900 pl-11 pr-12 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10"
                                             type={
                                                 showPassword
                                                     ? 'text'
@@ -203,7 +203,7 @@ export default function Login() {
                                                     !showPassword
                                                 )
                                             }
-                                            className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg text-slate-500 hover:text-white hover:bg-slate-800 transition"
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
                                             aria-label={
                                                 showPassword
                                                     ? 'Sembunyikan password'
@@ -238,7 +238,7 @@ export default function Login() {
 
                                 {/* Submit */}
                                 <button
-                                    className="w-full h-12 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-slate-950 font-bold transition-all shadow-lg shadow-emerald-500/20 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                    className="w-full h-12 rounded-xl bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-white font-bold transition-all shadow-lg shadow-emerald-500/10 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                                     type="submit"
                                     disabled={loading}
                                 >
@@ -267,22 +267,22 @@ export default function Login() {
                             {/* Register */}
                             <div className="relative my-7">
                                 <div className="absolute inset-0 flex items-center">
-                                    <div className="w-full border-t border-slate-800" />
+                                    <div className="w-full border-t border-slate-200" />
                                 </div>
 
                                 <div className="relative flex justify-center">
-                                    <span className="bg-slate-950 px-3 text-xs text-slate-600">
+                                    <span className="bg-white px-3 text-xs text-slate-400">
                                         atau
                                     </span>
                                 </div>
                             </div>
 
-                            <p className="text-center text-sm text-slate-400">
+                            <p className="text-center text-sm text-slate-600">
                                 Belum punya akun?{' '}
 
                                 <Link
                                     to="/register"
-                                    className="text-emerald-400 font-bold hover:text-emerald-300 transition"
+                                    className="text-emerald-600 font-bold hover:text-emerald-700 transition"
                                 >
                                     Daftar sekarang
                                 </Link>
@@ -292,7 +292,7 @@ export default function Login() {
                     </div>
 
                     {/* Footer */}
-                    <p className="text-center text-xs text-white/50 mt-5">
+                    <p className="text-center text-xs text-white/70 mt-5">
                         Jelajahi Indonesia, buat perjalananmu sendiri.
                     </p>
 

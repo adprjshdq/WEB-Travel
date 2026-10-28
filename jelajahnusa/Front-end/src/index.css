@@ -6,16 +6,16 @@
        COLORS
     ========================= */
 
-  --color-bg: #0b1220;
-  --color-panel: #111a2b;
-  --color-panel-soft: #151f32;
-  --color-line: #253149;
+  --color-bg: #ffffff;
+  --color-panel: #ffffff;
+  --color-panel-soft: #f8fafc;
+  --color-line: #e2e8f0;
 
-  --color-ink: #eef2f7;
-  --color-mute: #8f9bb0;
+  --color-ink: #1e293b;
+  --color-mute: #64748b;
 
   --color-accent: #22c55e;
-  --color-accent-soft: #163b29;
+  --color-accent-soft: #dcfce7;
 
   /* =========================
        TYPOGRAPHY
@@ -59,11 +59,7 @@
   body {
     margin: 0;
 
-    background:
-      radial-gradient(circle at 20% -10%,
-        rgba(34, 197, 94, 0.045),
-        transparent 28rem),
-      var(--color-bg);
+    background: var(--color-bg);
 
     color: var(--color-ink);
 
@@ -135,7 +131,7 @@
 
   ::selection {
     background: var(--color-accent);
-    color: #07100b;
+    color: #ffffff;
   }
 
   :focus-visible {
@@ -153,12 +149,12 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    background: #344158;
+    background: #cbd5e1;
     border-radius: 999px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: #43516b;
+    background: #94a3b8;
   }
 }
 
@@ -218,7 +214,7 @@
 
   .btn:hover {
     background: var(--color-panel-soft);
-    border-color: #35445e;
+    border-color: #cbd5e1;
   }
 
   .btn:active {
@@ -228,12 +224,12 @@
   .btn-p {
     background: var(--color-accent);
     border-color: var(--color-accent);
-    color: #07100b;
+    color: #ffffff;
   }
 
   .btn-p:hover {
-    background: #2dd46b;
-    border-color: #2dd46b;
+    background: #16a34a;
+    border-color: #16a34a;
   }
 
 
@@ -248,7 +244,7 @@
 
     padding: 0.55rem 0.75rem;
 
-    background: #0d1626;
+    background: #ffffff;
 
     border: 1px solid var(--color-line);
     border-radius: var(--radius-md);
@@ -264,7 +260,7 @@
   }
 
   .input:hover {
-    border-color: #34435d;
+    border-color: #cbd5e1;
   }
 
   .input:focus {
@@ -277,7 +273,7 @@
   }
 
   .input::placeholder {
-    color: #657289;
+    color: #94a3b8;
   }
 
   textarea.input {
@@ -295,7 +291,7 @@
 
     margin-bottom: 0.35rem;
 
-    color: #aab5c6;
+    color: #475569;
 
     font-size: 0.85rem;
     font-weight: 500;
@@ -336,8 +332,8 @@
 
   .chip[aria-pressed="true"] {
     background: var(--color-accent-soft);
-    border-color: rgba(34, 197, 94, 0.35);
-    color: #72e99b;
+    border-color: rgba(34, 197, 94, 0.5);
+    color: #16a34a;
     font-weight: 600;
   }
 
@@ -354,9 +350,9 @@
 
     border-radius: var(--radius-md);
 
-    background: #182338;
+    background: #e2e8f0;
 
-    color: rgb(255 255 255 / 70%);
+    color: rgb(30 41 59 / 70%);
 
     font-size: 0.75rem;
   }
